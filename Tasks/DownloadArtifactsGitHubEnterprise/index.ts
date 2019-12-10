@@ -159,7 +159,6 @@ async function run() {
             git.checkout([
                 '--progress', 
                 '--force', 
-                branch,
                 commitId
             ])
             .then(() => {
