@@ -19,6 +19,18 @@ async function InitRepo(git : gitP.SimpleGit, gheRepoUrl:string) {
                             reject(new Error(`git.addConfig gc.auto 0 failed with error ${ err }`));
                         });
                     
+                    const proxy : tl.ProxyConfiguration | null = tl.getHttpProxyConfiguration();
+                    // Is a Proxy set?
+                    if(proxy)
+                    {
+                        var proxyUrl = url.parse(proxy.proxyUrl);
+                        // Is this needed? or is this already included in the url?
+                        if (proxy.proxyUsername && proxy.proxyPassword) {
+                            proxyUrl.auth = proxy.proxyUsername + ':' + proxy.proxyPassword;
+                        }
+                        git.addConfig("http.proxy", url.format(proxyUrl));
+                    }
+                    
                     git.addConfig('http.sslVerify', 'false')
                         .catch((err : any) => {
                             reject(new Error(`git.addConfig http.sslVerify failed with error ${ err }`));
