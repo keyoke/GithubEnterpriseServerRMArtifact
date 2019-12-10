@@ -2,7 +2,7 @@
   "manifestVersion": 1,
   "id": "githubenterprise-custom-release-artifact-extension",
   "publisher": "GarethEmslie",
-  "version": "0.0.47",
+  "version": "0.0.48",
   "name": "Github Enterprise Artifact Extension",
   "description": "A sample for adding Github Enterprise support as Release Artifact",
   "public": false,
@@ -15,6 +15,9 @@
   "files": [
     {
       "path": "icon-githubenterprise-logo.png",
+      "addressable": true
+    },
+    {
       "path": "Tasks/DownloadArtifactsGitHubEnterprise",
       "addressable": true
     }
@@ -46,6 +49,7 @@
         "uniqueSourceIdentifier": "{{connection}}:{{definition}}:{{branch}}",
         "downloadTaskId": "6a23cb82-09af-48a3-bec7-0d30ca0c25e7",
         "artifactType": "SourceControl",
+        "icon": "icon-githubenterprise-logo.png",
         "inputDescriptors": [
           {
             "id": "connection",
