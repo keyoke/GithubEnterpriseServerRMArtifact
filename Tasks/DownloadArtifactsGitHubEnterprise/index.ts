@@ -13,8 +13,6 @@ async function InitRepo(git : gitP.SimpleGit, gheRepoUrl:string) {
                 git.addRemote('origin', gheRepoUrl)
                     .then(() => {
                     tl.debug(`Added new remote for origin at '${gheRepoUrl}'.`);
-                    console.log(`Downloading artifact.`);
-
                     // Disable the git housekeeping tasks - https://git-scm.com/docs/git-gc/2.12.0#_options
                     git.addConfig('gc.auto', '0')
                         .catch((err : any) => {
@@ -155,6 +153,7 @@ async function run() {
             tl.error(`git.raw.version failed with error ${ err }`);
         });
 
+        console.log(`Downloading artifact.`);
         // Init local repo at the download path
         InitRepo(git, gheRepoUrl).then(()=>{
             git.checkout([
