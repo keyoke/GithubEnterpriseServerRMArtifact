@@ -1,0 +1,229 @@
+{
+  "manifestVersion": 1,
+  "id": "githubenterprise-custom-release-artifact-extension",
+  "publisher": "GarethEmslie",
+  "version": "0.0.45",
+  "name": "Github Enterprise Artifact Extension",
+  "description": "A sample for adding Github Enterprise support as Release Artifact",
+  "public": false,
+  "categories": [ "Azure Pipelines" ],
+  "targets": [
+    {
+      "id": "Microsoft.VisualStudio.Services"
+    }
+  ],
+  "files": [
+    {
+      "path": "icon-githubenterprise-logo.png",
+      "path": "Tasks/DownloadArtifactsGitHubEnterprise",
+      "addressable": true
+    }
+  ],
+  "contributions": [
+      {
+          "id": "gitclone-build-release-task",
+          "type": "ms.vss-distributed-task.task",
+          "targets": [
+              "ms.vss-distributed-task.tasks"
+          ],
+          "properties": {
+              "name": "Tasks/DownloadArtifactsGitHubEnterprise"
+          }
+      },
+      {
+      "id": "githubenterprise-custom-release-artifact-type",
+      "description": "i18n:GitHubEnterprise Artifact",
+      "_description.comment": "Don't Localize the word 'GitHubEnterprise'",
+      "type": "ms.vss-releaseartifact.release-artifact-type",
+      "targets": [
+        "ms.vss-releaseartifact.artifact-types"
+      ],
+      "properties": {
+        "name": "GitHubEnterprise",
+        "displayName": "i18n:GitHubEnterprise",
+        "_displayName.comment": "Don't Localize the word 'GitHubEnterprise'",
+        "endpointTypeId": "githubenterprise",
+        "uniqueSourceIdentifier": "{{connection}}:{{definition}}:{{branch}}",
+        "downloadTaskId": "6a23cb82-09af-48a3-bec7-0d30ca0c25e7",
+        "artifactType": "SourceControl",
+        "inputDescriptors": [
+          {
+            "id": "connection",
+            "name": "i18n: Service connection",
+            "description": "i18n: Service connection ID",
+            "inputMode": "Combo",
+            "isConfidential": false,
+            "hasDynamicValueInformation": true,
+            "validation": {
+              "isRequired": true,
+              "dataType": "string",
+              "maxLength": 300
+            }
+          },
+          {
+            "id": "definition",
+            "name": "i18n: Source (repository)",
+            "description": "i18n: Repository to pull",
+            "inputMode": "Combo",
+            "isConfidential": false,
+            "hasDynamicValueInformation": true,
+            "dependencyInputIds": [
+              "connection"
+            ],
+            "validation": {
+              "isRequired": true,
+              "dataType": "string",
+              "maxLength": 300
+            }
+          },
+          {
+            "id": "branch",
+            "name": "i18n: Default branch",
+            "description": "i18n: Branch to checkout",
+            "inputMode": "Combo",
+            "isConfidential": false,
+            "hasDynamicValueInformation": true,
+            "dependencyInputIds": [
+              "connection",
+              "definition"
+            ],
+            "validation": {
+              "isRequired": true,
+              "dataType": "string",
+              "maxLength": 300
+            }
+          },
+          {
+            "id": "defaultVersionType",
+            "name": "i18n: Default version",
+            "description": "The default version will be deployed when new releases are created. The version can be changed for manually created releases at the time of release creation",
+            "inputMode": "Combo",
+            "isConfidential": false,
+            "hasDynamicValueInformation": false,
+            "validation": {
+              "isRequired": true,
+              "dataType": "string",
+              "maxLength": 300
+            },
+            "values": {
+              "inputId": "defaultVersionTypeValues",
+              "defaultValue": "latestFromBranchType",
+              "isLimitedToPossibleValues": true,
+              "possibleValues": [
+                {
+                  "value": "latestFromBranchType",
+                  "displayValue": "i18n:Latest from the default branch"
+                },
+                {
+                  "value": "specificVersionType",
+                  "displayValue": "i18n:Specific commit from default branch"
+                },
+                {
+                  "value": "selectDuringReleaseCreationType",
+                  "displayValue": "i18n:Specify at the time of release creation"
+                }
+              ]
+            }
+          },
+          {
+            "id": "defaultVersionSpecific",
+            "name": "i18n: Commit",
+            "description": "Default to a specific commit",
+            "inputMode": "Combo",
+            "isConfidential": false,
+            "hasDynamicValueInformation": true,
+            "dependencyInputIds": [
+              "connection",
+              "definition",
+              "branch",
+              "defaultVersionType"
+            ],
+            "validation": {
+              "isRequired": true,
+              "dataType": "string",
+              "maxLength": 300
+            },
+            "properties": {
+              "visibleRule": "defaultVersionType == specificVersionType"
+            }
+          },
+          {
+            "id": "artifacts",
+            "name": "i18n: Artifacts",
+            "description": "i18n: Artifacts",
+            "inputMode": "none",
+            "isConfidential": false,
+            "hasDynamicValueInformation": true,
+            "validation": {
+              "isRequired": false,
+              "dataType": "string"
+            },
+            "dependencyInputIds": [
+              "connection",
+              "definition",
+              "defaultVersionType",
+              "branch",
+              "defaultVersionSpecific"
+            ]
+          }
+        ],
+        "taskInputMapping": {
+          "connection": "{{{connection}}}",
+          "definition": "{{{definition}}}",
+          "submodules": "{{#equals checkoutSubmodules 'true' 1}}{{#equals checkoutNestedSubmodules 'true' 1}}Recursive{{else}}True{{/equals}}{{/equals}}",
+          "fetchDepth": "{{{fetchDepth}}}",
+          "lfs": "{{{gitLfsSupport}}}"
+        },
+        "dataSourceBindings": [
+          {
+            "target": "definition",
+            "endpointUrl":"{{endpoint.url}}api/v3/user/repos",
+            "resultSelector":"jsonpath:$.[*]",
+            "resultTemplate": "{ Value : \"{{{full_name}}}\", DisplayValue : \"{{{full_name}}}\" }"
+          },
+          {
+            "target": "branch",
+            "endpointUrl":"{{endpoint.url}}api/v3/repos/{{{definition}}}/branches",
+            "resultSelector":"jsonpath:$.[*]",
+            "resultTemplate": "{ Value : \"{{{name}}}\", DisplayValue : \"{{{name}}}\" }"
+          },
+          {
+            "target": "defaultVersionSpecific",
+            "endpointUrl":"{{endpoint.url}}api/v3/repos/{{{definition}}}/commits?sha={{branch}}",
+             "resultSelector":"jsonpath:$.[*]",
+            "resultTemplate": "{ Value : \"{{{sha}}}\", DisplayValue : \"{{#stringLeft sha 8}}{{/stringLeft}} ({{#stringLeft commit.message 245}}{{/stringLeft}})\" }"
+          },
+          {
+            "target": "versions",
+            "endpointUrl":"{{endpoint.url}}api/v3/repos/{{{definition}}}/commits?sha={{branch}}",
+             "resultSelector":"jsonpath:$.[*]",
+            "resultTemplate": "{ Value : \"{{{sha}}}\", DisplayValue : \"{{#stringLeft sha 8}}{{/stringLeft}} ({{#stringLeft commit.message 245}}{{/stringLeft}})\" }"
+          },
+          {
+            "target": "latestversion",
+            "endpointUrl":"{{{endpoint.url}}}api/v3/repos/{{{definition}}}/commits?sha={{version}}",
+            "resultSelector":"jsonpath:$.[0]",
+            "resultTemplate": "{ Value : \"{{{sha}}}\", DisplayValue : \"{{#stringLeft sha 8}}{{/stringLeft}} ({{#stringLeft commit.message 245}}{{/stringLeft}})\" }"
+          },
+          {
+            "target": "artifacts",
+            "endpointUrl":"{{endpoint.url}}api/v3/repos/{{{definition}}}/contents?ref={{#equals defaultVersionType 'specificVersionType'}}{{version}}{{else}}{{branch}}{{/equals}}",
+            "resultSelector":"jsonpath:$.[*]",
+            "resultTemplate": "{ \"value\" : \"{{{path}}}\",  \"displayValue\" : \"{{{name}}}\",  \"data\" : { {{#equals type 'dir'}} \"artifactType\": \"folder\" {{else}} \"itemType\": \"file\" {{/equals}} } }"
+          },
+          {
+            "target": "artifactItems",
+            "endpointUrl":"{{endpoint.url}}api/v3/repos/{{{definition}}}/contents/{{itemPath}}?ref={{#equals defaultVersionType 'specificVersionType'}}{{version}}{{else}}{{branch}}{{/equals}}",
+            "resultSelector":"jsonpath:$.[*]",
+            "resultTemplate": "{ \"value\" : \"{{{path}}}\",  \"displayValue\" : \"{{{name}}}\",  \"data\" : { {{#equals type 'dir'}} \"artifactType\": \"folder\" {{else}} \"itemType\": \"file\" {{/equals}} } }"
+          }
+        ],
+        "browsableArtifactTypeMapping": {
+          "folder": "artifactItems"
+        }
+      }
+    }
+  ],
+  "scopes": [],
+  "contributionTypes": []
+}
