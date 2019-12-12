@@ -9,7 +9,7 @@
     "author": "GarethEmslie",
     "version": {
         "Major": 0,
-        "Minor": 40,
+        "Minor": 55,
         "Patch": 0
     },
     "instanceNameFormat": "Download Artifacts - Github Enterprise",

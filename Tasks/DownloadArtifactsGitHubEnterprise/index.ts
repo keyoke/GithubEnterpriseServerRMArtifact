@@ -5,63 +5,53 @@ import shell = require("shelljs");
 import fs = require('fs');
 
 async function InitRepo(git : gitP.SimpleGit, gheRepoUrl:string) {
-    const promise = new Promise((resolve, reject) => {
-        // the resolve / reject functions control the fate of the promise
-        git.init()
-            .then(() => {
-                // Add the git remote repo
-                git.addRemote('origin', gheRepoUrl)
-                    .then(() => {
-                    tl.debug(`Added new remote for origin at '${gheRepoUrl}'.`);
-                    // Disable the git housekeeping tasks - https://git-scm.com/docs/git-gc/2.12.0#_options
-                    git.addConfig('gc.auto', '0')
-                        .catch((err : any) => {
-                            reject(new Error(`git.addConfig gc.auto 0 failed with error ${ err }`));
-                        });
-                    
-                    const proxy : tl.ProxyConfiguration | null = tl.getHttpProxyConfiguration();
-                    // Is a Proxy set?
-                    if(proxy)
-                    {
-                        var proxyUrl = url.parse(proxy.proxyUrl);
-                        // Is this needed? or is this already included in the url?
-                        if (proxy.proxyUsername && proxy.proxyPassword) {
-                            proxyUrl.auth = proxy.proxyUsername + ':' + proxy.proxyPassword;
-                        }
-                        git.addConfig("http.proxy", url.format(proxyUrl));
-                    }
-                    
-                    git.addConfig('http.sslVerify', 'false')
-                        .catch((err : any) => {
-                            reject(new Error(`git.addConfig http.sslVerify failed with error ${ err }`));
-                        });
-                    
-                    // git.addConfig('http.extraheader', `AUTHORIZATION: basic ${ apitoken }`)
-                    //     .catch((err : any) => {
-                    //         reject(new Error(`git.addConfig http.extraheader failed with error ${ err }`));
-                    //     });
+    // Init the git repo folder
+    await git.init();
 
-                    return git.fetch([
-                        '--tags', 
-                        '--prune', 
-                        '--progress',
-                        '--no-recurse-submodules',
-                        'origin'
-                    ]).then(() => {
-                        resolve();
-                    }).catch((err : any) => {
-                        reject(`git.fetch failed with error ${ err }`);
-                    });
-                    
-                }).catch((err : any) => {
-                    reject(new Error(`git.addRemote failed with error ${ err }`));
-                });
-        })
-        .catch((err : any) => {
-            reject(new Error(`git.init failed with error ${ err }`));
-        });
-    });
-    return promise;
+    // Disable the git housekeeping tasks - https://git-scm.com/docs/git-gc/2.12.0#_options
+    await git.addConfig('gc.auto', '0');
+         
+    const proxy : tl.ProxyConfiguration | null = tl.getHttpProxyConfiguration();
+    // Is a Proxy set?
+    if(proxy)
+    {
+        var proxyUrl = url.parse(proxy.proxyUrl);
+        // Is this needed? or is this already included in the url?
+        if (proxy.proxyUsername && proxy.proxyPassword) {
+            proxyUrl.auth = proxy.proxyUsername + ':' + proxy.proxyPassword;
+        }
+        await git.addConfig("http.proxy", url.format(proxyUrl));
+    }
+
+    // Make sure we are not using credential helper as the interactive prompt as blocks this task
+    const data = await git.raw(
+        [
+            'config',
+            '--get',
+            'credential.helper'
+        ]);
+    
+    tl.debug(`credential.helper = ${ data }`);
+    if(data && data !== "")
+    {
+        throw new Error('If credential helper is enabled the interactive prompt can block this task.');
+    }
+    
+    await git.addConfig('http.sslVerify', 'false');
+
+    // Add the git remote repo
+    await git.addRemote('origin', gheRepoUrl);
+
+    tl.debug(`Added new remote for origin at '${gheRepoUrl}'.`);
+
+    // Fetch git repo from origin
+    await git.fetch([
+        '--tags', 
+        '--prune', 
+        '--progress',
+        '--no-recurse-submodules',
+        'origin'
+    ]); 
 }
 
 async function run() {
@@ -144,45 +134,28 @@ async function run() {
                         .silent(true)
                         .customBinary(gitPath)
                         .outputHandler((command, stdout, stderr) => {
-                            stdout.on(
-                                'data',
-                                (data) => {
-                                    tl.debug(data);
-                                });
-                            stderr.on(
-                                'data',
-                                (data) => {
-                                    tl.debug(data);
-                                });
+                            stdout.pipe(process.stdout);
                          });
 
         // Query Git client version
-        git.raw(
+        await git.raw(
         [
             'version'
-        ])
-        .catch((err : any) => {
-            tl.error(`git.raw.version failed with error ${ err }`);
-        });
+        ]);
 
         console.log(`Downloading artifact.`);
+
         // Init local repo at the download path
-        InitRepo(git, gheRepoUrl).then(()=>{
-            git.checkout([
-                '--progress', 
-                '--force', 
-                commitId
-            ])
-            .then(() => {
-                console.log(`Downloading artifact completed.`);
-            })
-            .catch((err : any) => {
-                throw new Error(`git.checkout failed with error ${ err }`);
-            }); 
-        })
-        .catch((err : Error) => {
-            throw err;
-        });
+        await InitRepo(git, gheRepoUrl);
+
+        // Checkout the specific commit from the repo
+        await git.checkout([
+            '--progress', 
+            '--force', 
+            commitId
+        ]);
+
+        console.log(`Downloading artifact completed.`);
 
     }
     catch (err) {
