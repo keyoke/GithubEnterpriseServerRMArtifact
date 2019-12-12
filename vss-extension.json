@@ -2,7 +2,7 @@
   "manifestVersion": 1,
   "id": "githubenterprise-custom-release-artifact-extension",
   "publisher": "GarethEmslie",
-  "version": "0.0.64",
+  "version": "0.0.69",
   "name": "GithubEnterprise Artifact Extension",
   "description": "A sample for adding GithubEnterprise support as Release Artifact",
   "public": false,
