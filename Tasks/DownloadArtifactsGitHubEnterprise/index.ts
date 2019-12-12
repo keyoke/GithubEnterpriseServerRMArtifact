@@ -4,7 +4,7 @@ import url = require('url');
 import shell = require("shelljs");
 import fs = require('fs');
 
-async function InitRepo(git : gitP.SimpleGit, gheRepoUrl:string) {
+async function InitRepo(git : gitP.SimpleGit, gheRepoUrl : string, acceptUntrustedCerts : boolean = false) {
     tl.debug('Initializing git repository.');
     // Init the git repo folder
     await git.init();
@@ -48,9 +48,12 @@ async function InitRepo(git : gitP.SimpleGit, gheRepoUrl:string) {
         throw new Error('If credential helper is enabled the interactive prompt can block this task.');
     }
     
-    tl.debug('Setting git config http.sslVerify.');
-    // We should get this from the GHE Service Endpoint configuration!
-    await git.addConfig('http.sslVerify', 'false');
+    if(!acceptUntrustedCerts)
+    {
+        tl.debug('Allow untrusted Certs for git.');
+        // We should get this from the GHE Service Endpoint configuration!
+        await git.addConfig('http.sslVerify', 'false');
+    }
 
     tl.debug(`Adding new remote for origin at '${gheRepoUrl}'.`);
     // Add the git remote repo
@@ -71,25 +74,20 @@ async function InitRepo(git : gitP.SimpleGit, gheRepoUrl:string) {
 async function run() {
     console.log(`Downloading artifact.`);
     try {
-        const connection : string | undefined = tl.getInput("connection");
-        const repository: string | undefined = tl.getInput("definition");
-        const branch: string | undefined = tl.getInput("branch");
-        const commitId: string | undefined = tl.getInput("version");
-        const downloadPath: string | undefined = tl.getInput("downloadPath");
+        const connection : string | undefined = tl.getInput("connection", false);
+        const repository: string | undefined = tl.getInput("definition", false);
+        const branch: string | undefined = tl.getInput("branch", false);
+        const commitId: string | undefined = tl.getInput("version", false);
+        const downloadPath: string | undefined = tl.getInput("downloadPath", false);
 
         if(!connection)
         {
-            throw new Error("DownloadArtifactsGitHubEnterprise sample task requires a valid Service Connection for Github Enterprise.");          
-        }
-
-        const hostUrl : string | undefined = tl.getEndpointUrl(connection, false);
-
-        if(!hostUrl)
-        {
-            throw new Error("DownloadArtifactsGitHubEnterprise sample task requires a valid hostUrl for its Service Connection for Github Enterprise.");       
+            throw new Error("Invalid service endpoint.");
         }
         
-        const auth = tl.getEndpointAuthorization(connection, false);
+        const hostUrl : string | undefined = tl.getEndpointUrl(connection, false);        
+        const auth: tl.EndpointAuthorization | undefined = tl.getEndpointAuthorization(connection, false);
+
         if(!auth) {
             throw new Error("DownloadArtifactsGitHubEnterprise sample task supports only GitHub PAT."); 
         }
@@ -97,25 +95,16 @@ async function run() {
         const password : string | undefined = auth.parameters["password"];
         const username : string | undefined = auth.parameters["username"];
         const apitoken : string | undefined = auth.parameters["apitoken"];
+        const acceptUntrustedCerts: boolean = (/true/i).test(auth.parameters["acceptUntrustedCerts"]);
 
-        if(!repository)
+        if(!downloadPath)
         {
-            throw new Error("DownloadArtifactsGitHubEnterprise sample task requires a valid Repository for Github Enterprise.");         
-        }
-
-        if(!branch)
-        {
-            throw new Error("DownloadArtifactsGitHubEnterprise sample task requires a valid branch for Github Enterprise.");        
+            throw new Error("Invalid downloadPath.");
         }
 
         if(!commitId)
         {
-            throw new Error("DownloadArtifactsGitHubEnterprise sample task requires a valid commit for Github Enterprise.");   
-        }
-
-        if(!downloadPath)
-        {
-            throw new Error("DownloadArtifactsGitHubEnterprise sample task requires a valid commit for Github Enterprise.");      
+            throw new Error("Invalid version.");
         }
 
         // Make sure we have Git client
@@ -161,7 +150,7 @@ async function run() {
         ]);
 
         // Init local repo at the download path
-        await InitRepo(git, gheRepoUrl);
+        await InitRepo(git, gheRepoUrl, acceptUntrustedCerts);
 
         tl.debug(`Starting git checkout for desired commit - ${commitId}`);
         // Checkout the specific commit from the repo
