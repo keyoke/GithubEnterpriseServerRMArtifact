@@ -3,6 +3,7 @@ import gitP = require('simple-git/promise');
 import url = require('url');
 import shell = require("shelljs");
 import fs = require('fs');
+import path = require('path');
 
 async function InitRepo(git : gitP.SimpleGit, gheRepoUrl : string, acceptUntrustedCerts : boolean = false, authHeader : string = "") {
     tl.debug('Initializing git repository.');
@@ -54,7 +55,6 @@ async function InitRepo(git : gitP.SimpleGit, gheRepoUrl : string, acceptUntrust
 
     tl.debug('fetching remote origin.');
     const fetchArgs : Array<string> = [
-        'fetch',
         '--tags', 
         '--prune', 
         '--progress',
@@ -66,19 +66,22 @@ async function InitRepo(git : gitP.SimpleGit, gheRepoUrl : string, acceptUntrust
     {
         tl.debug('Allow untrusted Certs for git.');
         // We should get this from the GHE Service Endpoint configuration!
-        fetchArgs.unshift('-c http.sslVerify=false');
+        //fetchArgs.unshift('-c http.sslVerify=false');
+        await git.addConfig('http.sslVerify', 'false');
     }
 
     // Do we have an auth header? if so set http.extraheader for this command
     if(authHeader)
     {
         tl.debug('Adding Auth Header.');
-        fetchArgs.unshift('-c http.extraheader="AUTHORIZATION: ' + authHeader +'"');
+        //fetchArgs.unshift('-c http.extraheader="AUTHORIZATION: ' + authHeader +'"');
+        await git.addConfig('http.extraheader', 'AUTHORIZATION: ' + authHeader);
     }
 
     // Fetch git repo from origin
-    // await git.fetch(fetchArgs); 
-    await git.raw(fetchArgs);
+    await git.fetch(fetchArgs); 
+    // tl.debug('git ' + fetchArgs.join(' '));
+    // await git.raw(fetchArgs);
 
     tl.debug('Git repository initialization completed succesfully.');
 }
@@ -123,10 +126,15 @@ async function run() {
         var gitPath : string | undefined = tl.which('git', false);
         if(!gitPath)
         {
-            // In the case when the git client doesnt exist in path we should look in agent externals folder
-            // var agentGit = path.join(rootDirectory, "externals", "git", "cmd", "git.exe");
-            throw new Error('git not found. Please ensure installed and in the agent path');
+            if(process.env.AGENT_HOMEDIRECTORY)
+            {
+                // In the case when the git client doesnt exist in path we should look in agent externals folder
+                gitPath = path.join(process.env.AGENT_HOMEDIRECTORY, "externals", "git", "cmd", "git.exe");
+            }
         }
+
+        if(!gitPath || !fs.existsSync(gitPath))
+            throw new Error('git not found. Please ensure installed and in the agent path');
 
         tl.debug(`Checking if downloadPath folder '${downloadPath}' exists.`);
         // Create the repo folder if doesnt exist
@@ -144,6 +152,10 @@ async function run() {
         }
         else if (apitoken) {
             authHeader = `basic ${Buffer.from('pat:' + apitoken).toString('base64')}`
+        }
+        else
+        {
+            throw new Error('unsupported authentication method!');
         }
 
         tl.debug(`GitHub Enterprise Repo url is '${gheRepoUrl}'.`);
@@ -164,7 +176,7 @@ async function run() {
         ]);
 
         // Init local repo at the download path
-        await InitRepo(git, gheRepoUrl, acceptUntrustedCerts, apitoken);
+        await InitRepo(git, gheRepoUrl, acceptUntrustedCerts, authHeader);
 
         tl.debug(`Starting git checkout for desired commit - ${commitId}`);
 
