@@ -2,7 +2,7 @@
   "manifestVersion": 1,
   "id": "githubenterprise-custom-release-artifact-extension",
   "publisher": "GarethEmslie",
-  "version": "0.0.72",
+  "version": "0.0.73",
   "name": "GithubEnterprise Artifact Extension",
   "description": "A sample for adding GithubEnterprise support as Release Artifact",
   "public": false,
@@ -13,16 +13,11 @@
     }
   ],
   "icons": {
-    "default": "icon-githubenterprise-logo.png",
-    "wide": "icon-githubenterprise-logo-wide.png"
+    "default": "icon-githubenterprise-logo.png"
   },
   "files": [
     {
       "path": "icon-githubenterprise-logo.png",
-      "addressable": true
-    },
-    {
-      "path": "icon-githubenterprise-logo-wide.png",
       "addressable": true
     },
     {
