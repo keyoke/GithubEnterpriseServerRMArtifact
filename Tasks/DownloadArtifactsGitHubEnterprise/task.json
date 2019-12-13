@@ -3,13 +3,13 @@
     "id": "6a23cb82-09af-48a3-bec7-0d30ca0c25e7",
     "name": "DownloadArtifactsGitHubEnterprise",
     "friendlyName": "Download Artifacts - GitHub Enterprise",
-    "description": "Download Github Enterprise code repository using Git Clone",
+    "description": "Download GithubEnterprise Artifact",
     "helpMarkDown": "",
     "category": "Utility",
-    "author": "GarethEmslie",
+    "author": "soft-cor",
     "version": {
         "Major": 0,
-        "Minor": 63,
+        "Minor": 69,
         "Patch": 0
     },
     "instanceNameFormat": "Download Artifacts - Github Enterprise",

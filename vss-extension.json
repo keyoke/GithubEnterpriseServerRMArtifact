@@ -1,10 +1,10 @@
 {
   "manifestVersion": 1,
   "id": "githubenterprise-custom-release-artifact-extension",
-  "publisher": "GarethEmslie",
-  "version": "0.0.73",
-  "name": "GithubEnterprise Artifact Extension",
-  "description": "A sample for adding GithubEnterprise support as Release Artifact",
+  "publisher": "soft-cor",
+  "version": "0.0.80",
+  "name": "GithubEnterprise Release Artifact",
+  "description": "Add support for GitHubEnterprise as a release artifact",
   "public": false,
   "categories": [ "Azure Pipelines" ],
   "targets": [

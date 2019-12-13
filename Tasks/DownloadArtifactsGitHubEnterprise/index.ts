@@ -4,7 +4,7 @@ import url = require('url');
 import shell = require("shelljs");
 import fs = require('fs');
 
-async function InitRepo(git : gitP.SimpleGit, gheRepoUrl : string, acceptUntrustedCerts : boolean = false) {
+async function InitRepo(git : gitP.SimpleGit, gheRepoUrl : string, acceptUntrustedCerts : boolean = false, authHeader : string = "") {
     tl.debug('Initializing git repository.');
     // Init the git repo folder
     await git.init();
@@ -48,26 +48,38 @@ async function InitRepo(git : gitP.SimpleGit, gheRepoUrl : string, acceptUntrust
         throw new Error('If credential helper is enabled the interactive prompt can block this task.');
     }
     
-    if(!acceptUntrustedCerts)
-    {
-        tl.debug('Allow untrusted Certs for git.');
-        // We should get this from the GHE Service Endpoint configuration!
-        await git.addConfig('http.sslVerify', 'false');
-    }
-
     tl.debug(`Adding new remote for origin at '${gheRepoUrl}'.`);
     // Add the git remote repo
     await git.addRemote('origin', gheRepoUrl);
 
     tl.debug('fetching remote origin.');
-    // Fetch git repo from origin
-    await git.fetch([
+    const fetchArgs : Array<string> = [
+        'fetch',
         '--tags', 
         '--prune', 
         '--progress',
         '--no-recurse-submodules',
         'origin'
-    ]); 
+    ];
+
+    if(!acceptUntrustedCerts)
+    {
+        tl.debug('Allow untrusted Certs for git.');
+        // We should get this from the GHE Service Endpoint configuration!
+        fetchArgs.unshift('-c http.sslVerify=false');
+    }
+
+    // Do we have an auth header? if so set http.extraheader for this command
+    if(authHeader)
+    {
+        tl.debug('Adding Auth Header.');
+        fetchArgs.unshift('-c http.extraheader="AUTHORIZATION: ' + authHeader +'"');
+    }
+
+    // Fetch git repo from origin
+    // await git.fetch(fetchArgs); 
+    await git.raw(fetchArgs);
+
     tl.debug('Git repository initialization completed succesfully.');
 }
 
@@ -123,14 +135,16 @@ async function run() {
             shell.mkdir(downloadPath);
         }        
 
-        // Make sure we inject the PAT for authentication
         var gheRepo = url.parse(`${ hostUrl }${ repository }.git`)
-        if (username && password) {
-              gheRepo.auth = username + ':' + password;
-        }else if (apitoken) {
-              gheRepo.auth = 'dummyuser:' + apitoken;
-        }
         var gheRepoUrl = url.format(gheRepo)
+
+        let authHeader : string = "";
+        if (username && password) {
+            authHeader = `basic ${Buffer.from(username + ':' + password).toString('base64')}`;
+        }
+        else if (apitoken) {
+            authHeader = `basic ${Buffer.from('pat:' + apitoken).toString('base64')}`
+        }
 
         tl.debug(`GitHub Enterprise Repo url is '${gheRepoUrl}'.`);
 
@@ -150,9 +164,10 @@ async function run() {
         ]);
 
         // Init local repo at the download path
-        await InitRepo(git, gheRepoUrl, acceptUntrustedCerts);
+        await InitRepo(git, gheRepoUrl, acceptUntrustedCerts, apitoken);
 
         tl.debug(`Starting git checkout for desired commit - ${commitId}`);
+
         // Checkout the specific commit from the repo
         const result = await git.checkout([
             '--progress', 
