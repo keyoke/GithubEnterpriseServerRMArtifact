@@ -1,18 +1,19 @@
 import tl = require('azure-pipelines-task-lib/task');
-import gitP = require('simple-git/promise');
 import url = require('url');
 import shell = require("shelljs");
 import fs = require('fs');
 import path = require('path');
+import { IGit } from './IGit';
+import { Git } from './Git';
 
-async function InitRepo(git : gitP.SimpleGit, gheRepoUrl : string, acceptUntrustedCerts : boolean = false, authHeader : string = "") {
+async function InitRepo(git : IGit, gheRepoUrl : string, acceptUntrustedCerts : boolean = false, authHeader : string = "") {
     tl.debug('Initializing git repository.');
     // Init the git repo folder
-    await git.init();
+    git.initSync();
 
     tl.debug('Disabling git house keeping tasks.');
     // Disable the git housekeeping tasks - https://git-scm.com/docs/git-gc/2.12.0#_options
-    await git.addConfig('gc.auto', '0');
+    git.addConfigSync('gc.auto', '0');
 
     tl.debug('Getting agent proxy configuration.');
     // Get the proxy configured for the DevOps Agent
@@ -32,17 +33,20 @@ async function InitRepo(git : gitP.SimpleGit, gheRepoUrl : string, acceptUntrust
         
         tl.debug('Configuring git proxy.');
         // Set the proxy for git
-        await git.addConfig("http.proxy", url.format(proxyUrl));
+        git.addConfigSync("http.proxy", url.format(proxyUrl));
+    }
+
+    if(!acceptUntrustedCerts)
+    {
+        tl.debug('Allow untrusted Certs for git.');
+        // We should get this from the GHE Service Endpoint configuration!
+        //fetchArgs.unshift('-c http.sslVerify=false');
+        git.addConfigSync('http.sslVerify', 'false');
     }
 
     tl.debug('Getting git config for credential-helper.');
     // Make sure we are not using credential helper as the interactive prompt as blocks this task
-    const data = await git.raw(
-        [
-            'config',
-            '--get',
-            'credential.helper'
-        ]);
+    const data = git.getConfigSync('credential.helper');
     
     if(data && data.trim() !== "")
     {
@@ -51,37 +55,12 @@ async function InitRepo(git : gitP.SimpleGit, gheRepoUrl : string, acceptUntrust
     
     tl.debug(`Adding new remote for origin at '${gheRepoUrl}'.`);
     // Add the git remote repo
-    await git.addRemote('origin', gheRepoUrl);
+    git.addRemoteSync('origin', gheRepoUrl);
 
     tl.debug('fetching remote origin.');
-    const fetchArgs : Array<string> = [
-        '--tags', 
-        '--prune', 
-        '--progress',
-        '--no-recurse-submodules',
-        'origin'
-    ];
-
-    if(!acceptUntrustedCerts)
-    {
-        tl.debug('Allow untrusted Certs for git.');
-        // We should get this from the GHE Service Endpoint configuration!
-        //fetchArgs.unshift('-c http.sslVerify=false');
-        await git.addConfig('http.sslVerify', 'false');
-    }
-
-    // Do we have an auth header? if so set http.extraheader for this command
-    if(authHeader)
-    {
-        tl.debug('Adding Auth Header.');
-        //fetchArgs.unshift('-c http.extraheader="AUTHORIZATION: ' + authHeader +'"');
-        await git.addConfig('http.extraheader', 'AUTHORIZATION: ' + authHeader);
-    }
 
     // Fetch git repo from origin
-    await git.fetch(fetchArgs); 
-    // tl.debug('git ' + fetchArgs.join(' '));
-    // await git.raw(fetchArgs);
+    await git.fetch('origin'); 
 
     tl.debug('Git repository initialization completed succesfully.');
 }
@@ -122,20 +101,6 @@ async function run() {
             throw new Error("Invalid version.");
         }
 
-        // Make sure we have Git client
-        var gitPath : string | undefined = tl.which('git', false);
-        if(!gitPath)
-        {
-            if(process.env.AGENT_HOMEDIRECTORY)
-            {
-                // In the case when the git client doesnt exist in path we should look in agent externals folder
-                gitPath = path.join(process.env.AGENT_HOMEDIRECTORY, "externals", "git", "cmd", "git.exe");
-            }
-        }
-
-        if(!gitPath || !fs.existsSync(gitPath))
-            throw new Error('git not found. Please ensure installed and in the agent path');
-
         tl.debug(`Checking if downloadPath folder '${downloadPath}' exists.`);
         // Create the repo folder if doesnt exist
         if (!fs.existsSync(downloadPath)) {
@@ -146,46 +111,23 @@ async function run() {
         var gheRepo = url.parse(`${ hostUrl }${ repository }.git`)
         var gheRepoUrl = url.format(gheRepo)
 
-        let authHeader : string = "";
-        if (username && password) {
-            authHeader = `basic ${Buffer.from(username + ':' + password).toString('base64')}`;
-        }
-        else if (apitoken) {
-            authHeader = `basic ${Buffer.from('pat:' + apitoken).toString('base64')}`
-        }
-        else
-        {
-            throw new Error('unsupported authentication method!');
-        }
-
         tl.debug(`GitHub Enterprise Repo url is '${gheRepoUrl}'.`);
 
-        const git = gitP(downloadPath)
-                        .silent(true)
-                        .customBinary(gitPath)
-                        .outputHandler((command, stdout, stderr) => {
-                            stdout.pipe(process.stdout);
-                            stderr.pipe(process.stderr);
-                         });
+        // Instatiate of Git class
+        const git : IGit = new Git(downloadPath, username, password, apitoken);
 
         tl.debug('Checking git version.');
+        
         // Query Git client version
-        await git.raw(
-        [
-            'version'
-        ]);
+        git.versionSync();
 
         // Init local repo at the download path
-        await InitRepo(git, gheRepoUrl, acceptUntrustedCerts, authHeader);
+        await InitRepo(git, gheRepoUrl);
 
         tl.debug(`Starting git checkout for desired commit - ${commitId}`);
 
         // Checkout the specific commit from the repo
-        const result = await git.checkout([
-            '--progress', 
-            '--force', 
-            commitId
-        ]);
+        await git.checkout(commitId);
 
         tl.debug(`Completed git checkout for desired commit - ${commitId}`);
     }

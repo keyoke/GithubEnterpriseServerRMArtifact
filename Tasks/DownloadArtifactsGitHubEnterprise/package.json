@@ -11,6 +11,8 @@
   "dependencies": {
     "@types/shelljs": "^0.8.6",
     "azure-pipelines-task-lib": "^2.9.3",
+    "buffer-replace": "^1.0.0",
+    "events": "^3.0.0",
     "fs": "0.0.1-security",
     "shelljs": "^0.8.3",
     "simple-git": "^1.128.0"
