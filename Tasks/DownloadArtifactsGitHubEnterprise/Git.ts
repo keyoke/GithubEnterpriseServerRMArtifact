@@ -19,11 +19,11 @@ export class Git extends events.EventEmitter implements IGit {
         // Store needed git properties
         if (username && password) {
             this.authHeaderValue = Buffer.from(username + ':' + password).toString('base64');
-            this.authHeader = `basic ${this.authHeaderValue}`;
+            this.authHeader = 'AUTHORIZATION: basic ' + this.authHeaderValue;
         }
         else if (apitoken) {
-            this.authHeaderValue = Buffer.from('pat:' + apitoken).toString('base64');
-            this.authHeader = `basic ${this.authHeaderValue}`;
+            this.authHeaderValue = apitoken; //Buffer.from('pat:' + apitoken).toString('base64');
+            this.authHeader = 'AUTHORIZATION: bearer ' + this.authHeaderValue;
         }
         else
         {
@@ -86,10 +86,13 @@ export class Git extends events.EventEmitter implements IGit {
         // Add the auth header for our request
         if(this.authHeaderValue)
         {
-            args = ['-c','http.extraheader="AUTHORIZATION: basic ' + this.authHeaderValue +'"'];
+            args = [
+                '-c',
+                'http.extraheader="' + this.authHeader +'"'
+            ];
         }
         
-        args.concat([
+        args = args.concat([
             'fetch',
             '--tags', 
             '--prune', 
@@ -108,10 +111,13 @@ export class Git extends events.EventEmitter implements IGit {
         // Add the auth header for our request
         if(this.authHeaderValue)
         {
-            args = ['-c','http.extraheader="AUTHORIZATION: basic ' + this.authHeaderValue +'"'];
+            args = [
+                '-c',
+                'http.extraheader="' + this.authHeader +'"'
+            ];
         }
 
-        args.concat([
+        args = args.concat([
             'checkout',
             '--progress', 
             '--force', 
