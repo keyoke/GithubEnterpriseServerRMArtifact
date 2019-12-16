@@ -6,7 +6,7 @@ import path = require('path');
 import { IGit } from './IGit';
 import { Git } from './Git';
 
-async function InitRepo(git : IGit, gheRepoUrl : string, acceptUntrustedCerts : boolean = false, authHeader : string = "") {
+async function InitRepo(git : IGit, acceptUntrustedCerts : boolean = false) {
     tl.debug('Initializing git repository.');
     // Init the git repo folder
     git.initSync();
@@ -52,15 +52,6 @@ async function InitRepo(git : IGit, gheRepoUrl : string, acceptUntrustedCerts : 
     {
         throw new Error('If credential helper is enabled the interactive prompt can block this task.');
     }
-    
-    tl.debug(`Adding new remote for origin at '${gheRepoUrl}'.`);
-    // Add the git remote repo
-    git.addRemoteSync('origin', gheRepoUrl);
-
-    tl.debug('fetching remote origin.');
-
-    // Fetch git repo from origin
-    await git.fetch('origin'); 
 
     tl.debug('Git repository initialization completed succesfully.');
 }
@@ -122,7 +113,19 @@ async function run() {
         git.versionSync();
 
         // Init local repo at the download path
-        await InitRepo(git, gheRepoUrl);
+        await InitRepo(git, acceptUntrustedCerts);
+
+        tl.debug(`Adding new remote for origin at '${gheRepoUrl}'.`);
+        
+        // Add the git remote repo
+        git.addRemoteSync('origin', gheRepoUrl);
+    
+        tl.debug('fetching remote origin.');
+    
+        // Fetch git repo from origin
+        await git.fetch('origin'); 
+
+        tl.debug('Completed fetching remote origin.');
 
         tl.debug(`Starting git checkout for desired commit - ${commitId}`);
 
