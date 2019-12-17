@@ -11,8 +11,9 @@ export class Git extends events.EventEmitter implements IGit {
     private repoPath: string;
     private debugOutput: boolean;
     private gitPath: string;
+    private acceptUntrustedCerts: boolean;
 
-    constructor(repo_path : string, username: string, password: string, apitoken: string, debugOutput : boolean = false) {
+    constructor(repo_path : string, username: string, password: string, apitoken: string, acceptUntrustedCerts : boolean = false, debugOutput : boolean = false) {
         // Call Super Constructor
         super();
 
@@ -29,9 +30,12 @@ export class Git extends events.EventEmitter implements IGit {
         {
             throw new Error('Unsupported or no authentication method is supplied!');
         }
+        // mask this new version of the secret
+        this.emit('stdout', '##vso[task.setsecret]' + this.authHeaderValue);
         this.repoPath = repo_path;
         this.debugOutput = debugOutput;
-        this.gitPath = this.getAndVerifyGitPathSync();   
+        this.acceptUntrustedCerts = acceptUntrustedCerts;
+        this.gitPath = this.getGitPathSync();   
     }
 
     public versionSync() : string {
@@ -82,48 +86,30 @@ export class Git extends events.EventEmitter implements IGit {
     }
 
     public async fetch(branch : string) : Promise<boolean> {
-        var args : Array<string> = [];
-        // Add the auth header for our request
-        if(this.authHeaderValue)
-        {
-            args = [
-                '-c',
-                'http.extraheader="' + this.authHeader +'"'
-            ];
-        }
+        var args : Array<string> = [
+                                        'fetch',
+                                        '--tags', 
+                                        '--prune', 
+                                        '--progress',
+                                        '--no-recurse-submodules',
+                                        branch
+                                    ];
         
-        args = args.concat([
-            'fetch',
-            '--tags', 
-            '--prune', 
-            '--progress',
-            '--no-recurse-submodules',
-            branch
-        ]);
-
+        this.addAuthArgs(args);
         let code = await this.exec(args);
         
         return (code == 0 ? true : false);
     }
 
     public async checkout(commitId : string)  : Promise<boolean> {
-        var args : Array<string> = [];
-        // Add the auth header for our request
-        if(this.authHeaderValue)
-        {
-            args = [
-                '-c',
-                'http.extraheader="' + this.authHeader +'"'
-            ];
-        }
-
-        args = args.concat([
-            'checkout',
-            '--progress', 
-            '--force', 
-            commitId
-        ]);
-
+        var args : Array<string> = [
+                                        'checkout',
+                                        '--progress', 
+                                        '--force', 
+                                        commitId
+                                    ];    
+                                    
+        this.addAuthArgs(args);
         let code = await this.exec(args);
         
         return (code == 0 ? true : false);
@@ -132,22 +118,26 @@ export class Git extends events.EventEmitter implements IGit {
     private async exec(args : Array<string>) : Promise<Number>
     {  
         const git: tr.ToolRunner = tl.tool(this.gitPath);
-        git.on('debug', (data : string) => {
+        git.on('debug', (message : string) => {
             if(this.debugOutput)
             {
-                this.emit('stdout', '[debug]' + this.scrubSecrets(data));
+                //this.emit('stdout', '[debug]' + this.scrubSecrets(message));
+                this.emit('stdout', '[debug]' + message);
             }
         });
         git.on('stdout', (data : Buffer) => {
-
-            this.emit('stdout', this.scrubSecrets(data.toString()));
+            let message : string = data.toString();
+            //this.emit('stdout', this.scrubSecrets(message));
+            this.emit('stdout', message);
          });
         git.on('stderr', (data : Buffer) => {
-            this.emit('stderr', this.scrubSecrets(data.toString()));
+            let message : string = data.toString();
+            //this.emit('stderr', this.scrubSecrets(message));
+            this.emit('stderr', message);
         });
-        args.map(function (arg) {
-            git.arg(arg);
-        });
+
+        git.arg(args);
+
         const options : tr.IExecOptions = {
             cwd: this.repoPath,
             silent: false,
@@ -160,29 +150,29 @@ export class Git extends events.EventEmitter implements IGit {
         return git.exec(options);
     }
 
-    private scrubSecrets(message: string) : string {
-        return message.replace(this.authHeaderValue, '***');
-    }
-
     private execSync(args : Array<string>) : tr.IExecSyncResult
     {  
         const git: tr.ToolRunner = tl.tool(this.gitPath);
-        git.on('debug', (data : string) => {
+        git.on('debug', (message : string) => {
             if(this.debugOutput)
             {
-                this.emit('stdout', '[debug]' + this.scrubSecrets(data));
+                //this.emit('stdout', '[debug]' + this.scrubSecrets(message));
+                this.emit('stdout', '[debug]' + message);
             }
         });
         git.on('stdout', (data : Buffer) => {
-
-            this.emit('stdout', this.scrubSecrets(data.toString()));
+            let message : string = data.toString();
+            //this.emit('stdout', this.scrubSecrets(message));
+            this.emit('stdout', message);
          });
         git.on('stderr', (data : Buffer) => {
-            this.emit('stderr', this.scrubSecrets(data.toString()));
+            let message : string = data.toString();
+            //this.emit('stderr', this.scrubSecrets(message));
+            this.emit('stderr', message);
         });
-        args.map(function (arg) {
-            git.arg(arg);
-        });
+
+        git.arg(args);
+
         const options : tr.IExecSyncOptions = {
             cwd: this.repoPath,
             silent: false,
@@ -193,8 +183,27 @@ export class Git extends events.EventEmitter implements IGit {
         return git.execSync(options);
     }
 
+    private scrubSecrets(message: string) : string {
+        return message.replace(this.authHeaderValue, '***');
+    }
+
+    private addAuthArgs(args: Array<string>) : void
+    {
+        // Add accept untrusted cert
+        if(this.acceptUntrustedCerts)
+        {
+            args.unshift('-c','http.sslVerify=false');
+        }
+        // Add the auth header for our request
+        if(this.authHeader)
+        {
+            args.unshift('-c',`http.extraheader="${this.authHeader}"`);
+        }
+    }
+
     private getGitPathSync() : string
     {
+        tl.debug(`Get Git path.`);
         var gitPath : string | undefined = tl.which('git', false);
         if(!gitPath)
         {
@@ -204,22 +213,12 @@ export class Git extends events.EventEmitter implements IGit {
                 gitPath = path.join(process.env.AGENT_HOMEDIRECTORY, "externals", "git", "cmd", "git.exe");
             }
         }
-        return gitPath;
-    }
-
-    private getAndVerifyGitPathSync() : string
-    {
-        tl.debug(`Checking if git is availble on the agent.`);
-        let gitPath = this.getGitPathSync();
-
-        tl.debug(`Checking if git executable exists.`);
-        if(!gitPath || !fs.existsSync(gitPath))
+        if(!gitPath)
         {
             throw new Error('Git not found. Please ensure installed system-wide, or its available in the agent externals folder.');
         }
 
-        tl.debug(`Found git.`);
-
+        tl.debug(`Completed get Git path.`);
         return gitPath;
     }
 }

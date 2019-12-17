@@ -6,7 +6,7 @@ import path = require('path');
 import { IGit } from './IGit';
 import { Git } from './Git';
 
-async function InitRepo(git : IGit, acceptUntrustedCerts : boolean = false) {
+async function InitRepo(git : IGit) {
     tl.debug('Initializing git repository.');
     // Init the git repo folder
     git.initSync();
@@ -34,14 +34,6 @@ async function InitRepo(git : IGit, acceptUntrustedCerts : boolean = false) {
         tl.debug('Configuring git proxy.');
         // Set the proxy for git
         git.addConfigSync("http.proxy", url.format(proxyUrl));
-    }
-
-    if(!acceptUntrustedCerts)
-    {
-        tl.debug('Allow untrusted Certs for git.');
-        // We should get this from the GHE Service Endpoint configuration!
-        //fetchArgs.unshift('-c http.sslVerify=false');
-        git.addConfigSync('http.sslVerify', 'false');
     }
 
     tl.debug('Getting git config for credential-helper.');
@@ -105,7 +97,7 @@ async function run() {
         tl.debug(`GitHub Enterprise Repo url is '${gheRepoUrl}'.`);
 
         // Instatiate of Git class
-        const git : IGit = new Git(downloadPath, username, password, apitoken);
+        const git : IGit = new Git(downloadPath, username, password, apitoken, true);
 
         tl.debug('Checking git version.');
         
@@ -113,14 +105,14 @@ async function run() {
         git.versionSync();
 
         // Init local repo at the download path
-        await InitRepo(git, acceptUntrustedCerts);
+        await InitRepo(git);
 
         tl.debug(`Adding new remote for origin at '${gheRepoUrl}'.`);
-        
+
         // Add the git remote repo
         git.addRemoteSync('origin', gheRepoUrl);
     
-        tl.debug('fetching remote origin.');
+        tl.debug('Fetching remote origin.');
     
         // Fetch git repo from origin
         await git.fetch('origin'); 
