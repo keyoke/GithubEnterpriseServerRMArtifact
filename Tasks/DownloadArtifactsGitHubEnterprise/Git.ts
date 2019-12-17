@@ -197,7 +197,7 @@ export class Git extends events.EventEmitter implements IGit {
         // Add the auth header for our request
         if(this.authHeader)
         {
-            args.unshift('-c',`http.extraheader="${this.authHeader}"`);
+            args.unshift('-c','http.extraheader=' + this.authHeader);
         }
     }
 

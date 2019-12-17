@@ -6,48 +6,6 @@ import path = require('path');
 import { IGit } from './IGit';
 import { Git } from './Git';
 
-async function InitRepo(git : IGit) {
-    tl.debug('Initializing git repository.');
-    // Init the git repo folder
-    git.initSync();
-
-    tl.debug('Disabling git house keeping tasks.');
-    // Disable the git housekeeping tasks - https://git-scm.com/docs/git-gc/2.12.0#_options
-    git.addConfigSync('gc.auto', '0');
-
-    tl.debug('Getting agent proxy configuration.');
-    // Get the proxy configured for the DevOps Agent
-    const proxy : tl.ProxyConfiguration | null = tl.getHttpProxyConfiguration();
-    // Is a Proxy set?
-    if(proxy)
-    {
-        tl.debug('Agent proxy is set.');
-
-        // Get THe proxy Url
-        var proxyUrl = url.parse(proxy.proxyUrl);
-
-        // Is this needed? or is this already included in the url?
-        if (proxy.proxyUsername && proxy.proxyPassword) {
-            proxyUrl.auth = proxy.proxyUsername + ':' + proxy.proxyPassword;
-        }
-        
-        tl.debug('Configuring git proxy.');
-        // Set the proxy for git
-        git.addConfigSync("http.proxy", url.format(proxyUrl));
-    }
-
-    tl.debug('Getting git config for credential-helper.');
-    // Make sure we are not using credential helper as the interactive prompt as blocks this task
-    const data = git.getConfigSync('credential.helper');
-    
-    if(data && data.trim() !== "")
-    {
-        throw new Error('If credential helper is enabled the interactive prompt can block this task.');
-    }
-
-    tl.debug('Git repository initialization completed succesfully.');
-}
-
 async function run() {
     console.log(`Downloading artifact.`);
     try {
@@ -105,7 +63,47 @@ async function run() {
         git.versionSync();
 
         // Init local repo at the download path
-        await InitRepo(git);
+        tl.debug('Initializing git repository.');
+
+        // Init the git repo folder
+        git.initSync();
+
+        tl.debug('Disabling git house keeping tasks.');
+        // Disable the git housekeeping tasks - https://git-scm.com/docs/git-gc/2.12.0#_options
+        git.addConfigSync('gc.auto', '0');
+
+        tl.debug('Getting agent proxy configuration.');
+
+        // Get the proxy configured for the DevOps Agent
+        const proxy : tl.ProxyConfiguration | null = tl.getHttpProxyConfiguration();
+        // Is a Proxy set?
+        if(proxy)
+        {
+            tl.debug('Agent proxy is set.');
+
+            // Get THe proxy Url
+            var proxyUrl = url.parse(proxy.proxyUrl);
+
+            // Is this needed? or is this already included in the url?
+            if (proxy.proxyUsername && proxy.proxyPassword) {
+                proxyUrl.auth = proxy.proxyUsername + ':' + proxy.proxyPassword;
+            }
+            
+            tl.debug('Configuring git proxy.');
+            // Set the proxy for git
+            git.addConfigSync("http.proxy", url.format(proxyUrl));
+        }
+
+        tl.debug('Getting git config for credential-helper.');
+        // Make sure we are not using credential helper as the interactive prompt as blocks this task
+        const data = git.getConfigSync('credential.helper');
+
+        if(data && data.trim() !== "")
+        {
+            throw new Error('If credential helper is enabled the interactive prompt can block this task.');
+        }
+
+        tl.debug('Git repository initialization completed successfully.');
 
         tl.debug(`Adding new remote for origin at '${gheRepoUrl}'.`);
 
