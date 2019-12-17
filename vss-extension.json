@@ -221,10 +221,44 @@
             "endpointUrl":"{{endpoint.url}}api/v3/repos/{{{definition}}}/contents/{{itemPath}}?ref={{#equals defaultVersionType 'specificVersionType'}}{{version}}{{else}}{{branch}}{{/equals}}",
             "resultSelector":"jsonpath:$.[*]",
             "resultTemplate": "{ \"value\" : \"{{{path}}}\",  \"displayValue\" : \"{{{name}}}\",  \"data\" : { {{#equals type 'dir'}} \"artifactType\": \"folder\" {{else}} \"itemType\": \"file\" {{/equals}} } }"
+          },
+          {
+            "target": "createwebhook",
+            "endpointUrl": "{{{endpoint.url}}}api/v3/repos/:owner/:repo/hooks",
+            "requestVerb": "Post",
+            "requestContent": "{\"eventType\":\"rmwebhook-create\", \"resource\": {\"webHookName\": \"{{{webHookName}}}\", \"secret\":\"{{{secret}}}\", \"payloadUrl\": \"{{{payloadUrl}}}\"}}",
+            "resultSelector": "jsonpath:$"
+          },
+          {
+            "target": "deletewebhook",
+            "endpointUrl": "{{{endpoint.url}}}api/v3/repos/:owner/:repo/hooks/:hook_id",
+            "requestVerb": "Delete",
+            "requestContent": "{\"eventType\":\"rmwebhook-remove\", \"resource\": {\"webHookName\" : \"{{{webHookName}}}\" }}",
+            "resultSelector": "jsonpath:$"
+          },
+          {
+            "target": "listwebhook",
+            "endpointUrl": "{{{endpoint.url}}}api/v3/repos/:owner/:repo/hooks",
+            "requestVerb": "Get",
+            "requestContent": "{\"eventType\":\"rmwebhook-list\", \"resource\": {}}",
+            "resultSelector": "jsonpath:$.ReleaseWebHooks[*]",
+            "resultTemplate": "{ \"value\" : \"{{{ PayloadUrl }}}\", \"displayValue\" : \"{{{ WebHookName }}}\" }"
           }
         ],
         "browsableArtifactTypeMapping": {
           "folder": "artifactItems"
+        },
+        "ArtifactTriggerConfiguration" : {
+            "isTriggerSupported": true,
+            "isWebhookSupportedAtServerLevel": false,
+            "resources": {
+              "TriggerDisabledMessage": "i18n:Enabling the trigger will create a new release every time there is a change on the Github Enterprise Repo"
+            },
+            "payloadHashHeaderName": "X-Hub-Signature",
+            "webhookPayloadMapping" : {
+                "version": "{{head}}",
+                "definition": "{{repository.Name}}"
+            }
         }
       }
     }
