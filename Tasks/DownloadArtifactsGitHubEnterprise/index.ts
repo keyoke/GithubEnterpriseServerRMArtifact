@@ -9,34 +9,47 @@ import { Git } from './Git';
 async function run() {
     console.log(`Downloading artifact.`);
     try {
+        // Are we debugging?
+        const systemDebug = (/true/i).test((process.env.SYSTEM_DEBUG ? process.env.SYSTEM_DEBUG : "false"));
+        // Get the task parameters
         const connection : string | undefined = tl.getInput("connection", false);
-        const repository: string | undefined = tl.getInput("definition", false);
-        const branch: string | undefined = tl.getInput("branch", false);
-        const commitId: string | undefined = tl.getInput("version", false);
-        const downloadPath: string | undefined = tl.getInput("downloadPath", false);
 
         if(!connection)
         {
             throw new Error("Invalid service endpoint.");
         }
         
-        const hostUrl : string | undefined = tl.getEndpointUrl(connection, false);        
+        // Get the service connection details for communicating with Github Enterprise
+        const hostUrl : string | undefined = tl.getEndpointUrl(connection, false);  
         const auth: tl.EndpointAuthorization | undefined = tl.getEndpointAuthorization(connection, false);
 
         if(!auth) {
-            throw new Error("DownloadArtifactsGitHubEnterprise sample task supports only GitHub PAT."); 
+            throw new Error("A valid Github Enterprise service connections is required!"); 
         }
 
+        // Token,
+        tl.debug(`Service endpoint auth.scheme '${auth.scheme}'.`);
+        // Get the GHE auth details
         const password : string | undefined = auth.parameters["password"];
         const username : string | undefined = auth.parameters["username"];
         const apitoken : string | undefined = auth.parameters["apitoken"];
-        const acceptUntrustedCerts: boolean = (/true/i).test(auth.parameters["acceptUntrustedCerts"]);
+        // Get the SSL cert options
+        const acceptUntrustedCerts = (/true/i).test((tl.getEndpointDataParameter(connection, "acceptUntrustedCerts", true) ? tl.getEndpointDataParameter(connection, "acceptUntrustedCerts", true) : "false"));
+        tl.debug(`acceptUntrustedCerts is set to '${acceptUntrustedCerts}'.`);
+ 
+        // Get the GHE repository details
+        const repository: string | undefined = tl.getInput("definition", false);
+        const branch: string | undefined = tl.getInput("branch", false);
+        const commitId: string | undefined = tl.getInput("version", false);
+        const downloadPath: string | undefined = tl.getInput("downloadPath", false);
 
+        // Verify artifact download path is set
         if(!downloadPath)
         {
             throw new Error("Invalid downloadPath.");
         }
 
+        // make sure we have a valid commit
         if(!commitId)
         {
             throw new Error("Invalid version.");
@@ -49,18 +62,20 @@ async function run() {
             shell.mkdir(downloadPath);
         }        
 
+        // Setup GHE repo URI
         var gheRepo = url.parse(`${ hostUrl }${ repository }.git`)
         var gheRepoUrl = url.format(gheRepo)
 
         tl.debug(`GitHub Enterprise Repo url is '${gheRepoUrl}'.`);
 
         // Instatiate of Git class
-        const git : IGit = new Git(downloadPath, username, password, apitoken, true);
+        const git : IGit = new Git(downloadPath, username, password, apitoken, acceptUntrustedCerts, systemDebug);
 
         tl.debug('Checking git version.');
         
         // Query Git client version
-        git.versionSync();
+        const version = git.versionSync();
+        tl.debug(`git client version is '${version}'.`);
 
         // Init local repo at the download path
         tl.debug('Initializing git repository.');
@@ -96,9 +111,10 @@ async function run() {
 
         tl.debug('Getting git config for credential-helper.');
         // Make sure we are not using credential helper as the interactive prompt as blocks this task
-        const data = git.getConfigSync('credential.helper');
+        const credentialHelper = git.getConfigSync('credential.helper');
 
-        if(data && data.trim() !== "")
+        tl.debug(`credential-helper is set to '${credentialHelper}'.`);
+        if(credentialHelper && credentialHelper.trim() !== "")
         {
             throw new Error('If credential helper is enabled the interactive prompt can block this task.');
         }

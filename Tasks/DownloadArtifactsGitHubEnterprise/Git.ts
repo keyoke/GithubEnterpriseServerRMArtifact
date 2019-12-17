@@ -4,34 +4,22 @@ import tr = require('azure-pipelines-task-lib/toolrunner');
 import fs = require('fs');
 import path = require('path');
 import events = require('events');
+import os = require('os');
 
 export class Git extends events.EventEmitter implements IGit {
-    private authHeaderValue: string;
-    private authHeader: string;
-    private repoPath: string;
-    private debugOutput: boolean;
-    private gitPath: string;
-    private acceptUntrustedCerts: boolean;
+    private authHeaderValue: string = "";
+    private authHeader: string  = "";
+    private repoPath: string  = "";
+    private debugOutput: boolean = false;
+    private gitPath: string = "";
+    private acceptUntrustedCerts: boolean = false;
 
     constructor(repo_path : string, username: string, password: string, apitoken: string, acceptUntrustedCerts : boolean = false, debugOutput : boolean = false) {
         // Call Super Constructor
         super();
 
-        // Store needed git properties
-        if (username && password) {
-            this.authHeaderValue = Buffer.from(username + ':' + password).toString('base64');
-            this.authHeader = 'AUTHORIZATION: basic ' + this.authHeaderValue;
-        }
-        else if (apitoken) {
-            this.authHeaderValue = Buffer.from('pat:' + apitoken).toString('base64');
-            this.authHeader = 'AUTHORIZATION: basic ' + this.authHeaderValue;
-        }
-        else
-        {
-            throw new Error('Unsupported or no authentication method is supplied!');
-        }
-        // mask this new version of the secret
-        this.emit('stdout', '##vso[task.setsecret]' + this.authHeaderValue);
+        // Set the auth header properties
+        this.setAuthHeader(username, password, apitoken);
         this.repoPath = repo_path;
         this.debugOutput = debugOutput;
         this.acceptUntrustedCerts = acceptUntrustedCerts;
@@ -39,11 +27,21 @@ export class Git extends events.EventEmitter implements IGit {
     }
 
     public versionSync() : string {
+        let version : string = "";
         var args = [
             'version'
         ];
+        
         let result : tr.IExecSyncResult = this.execSync(args);
-        return (result.code == 0 ? result.stdout : "");
+        
+        if(result.code == 0)
+        {
+            let outputLines: string[] = result.stdout.split(os.EOL);
+            let lineColumns: string[] = outputLines[0].split(" ");
+            version = lineColumns[lineColumns.length-1];
+        }
+
+        return version;
     }
 
     public initSync()  : boolean {
@@ -76,12 +74,22 @@ export class Git extends events.EventEmitter implements IGit {
     }
 
     public getConfigSync(config_name : string) : string {
+        let value : string = "";
         var args = [
             'config', 
             '--get', 
             config_name
         ];
         let result : tr.IExecSyncResult = this.execSync(args);
+
+        if(result.code == 0)
+        {
+            let outputLines: string[] = result.stdout.split(os.EOL);
+            value = outputLines[0];
+        }
+
+        return value;
+
         return (result.code == 0 ? result.stdout : "");
     }
 
@@ -118,24 +126,6 @@ export class Git extends events.EventEmitter implements IGit {
     private async exec(args : Array<string>) : Promise<Number>
     {  
         const git: tr.ToolRunner = tl.tool(this.gitPath);
-        git.on('debug', (message : string) => {
-            if(this.debugOutput)
-            {
-                //this.emit('stdout', '[debug]' + this.scrubSecrets(message));
-                this.emit('stdout', '[debug]' + message);
-            }
-        });
-        git.on('stdout', (data : Buffer) => {
-            let message : string = data.toString();
-            //this.emit('stdout', this.scrubSecrets(message));
-            this.emit('stdout', message);
-         });
-        git.on('stderr', (data : Buffer) => {
-            let message : string = data.toString();
-            //this.emit('stderr', this.scrubSecrets(message));
-            this.emit('stderr', message);
-        });
-
         git.arg(args);
 
         const options : tr.IExecOptions = {
@@ -153,24 +143,6 @@ export class Git extends events.EventEmitter implements IGit {
     private execSync(args : Array<string>) : tr.IExecSyncResult
     {  
         const git: tr.ToolRunner = tl.tool(this.gitPath);
-        git.on('debug', (message : string) => {
-            if(this.debugOutput)
-            {
-                //this.emit('stdout', '[debug]' + this.scrubSecrets(message));
-                this.emit('stdout', '[debug]' + message);
-            }
-        });
-        git.on('stdout', (data : Buffer) => {
-            let message : string = data.toString();
-            //this.emit('stdout', this.scrubSecrets(message));
-            this.emit('stdout', message);
-         });
-        git.on('stderr', (data : Buffer) => {
-            let message : string = data.toString();
-            //this.emit('stderr', this.scrubSecrets(message));
-            this.emit('stderr', message);
-        });
-
         git.arg(args);
 
         const options : tr.IExecSyncOptions = {
@@ -183,8 +155,24 @@ export class Git extends events.EventEmitter implements IGit {
         return git.execSync(options);
     }
 
-    private scrubSecrets(message: string) : string {
-        return message.replace(this.authHeaderValue, '***');
+    private setAuthHeader(username: string, password: string, apitoken: string) : void
+    {
+        // Store needed git properties
+        if (username && password) {
+            this.authHeaderValue = Buffer.from(username + ':' + password).toString('base64');
+            this.authHeader = 'AUTHORIZATION: basic ' + this.authHeaderValue;
+        }
+        else if (apitoken) {
+            this.authHeaderValue = Buffer.from('pat:' + apitoken).toString('base64');
+            this.authHeader = 'AUTHORIZATION: basic ' + this.authHeaderValue;
+        }
+        else
+        {
+            throw new Error('Unsupported or no authentication method is supplied!');
+        }
+        // mask this new version of the secret does this work instead of scrubSecrets()?
+        // this.emit('stdout', '##vso[task.setsecret]' + this.authHeaderValue);
+        tl.setSecret(this.authHeaderValue);
     }
 
     private addAuthArgs(args: Array<string>) : void
