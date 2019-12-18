@@ -2,7 +2,7 @@
   "manifestVersion": 1,
   "id": "githubenterprise-custom-release-artifact-extension",
   "publisher": "soft-cor",
-  "version": "0.0.119",
+  "version": "0.0.120",
   "name": "GithubEnterprise Release Artifact",
   "description": "Add support for GitHubEnterprise as a release artifact",
   "public": false,
@@ -224,25 +224,26 @@
           },
           {
             "target": "createwebhook",
-            "endpointUrl": "{{{endpoint.url}}}api/v3/repos/:owner/:repo/hooks",
+            "endpointUrl": "{{{endpoint.url}}}api/v3/repos/{{{definition}}}/hooks",
             "requestVerb": "Post",
-            "requestContent": "{\"eventType\":\"rmwebhook-create\", \"resource\": {\"webHookName\": \"{{{webHookName}}}\", \"secret\":\"{{{secret}}}\", \"payloadUrl\": \"{{{payloadUrl}}}\"}}",
+            "requestHeader": "{\"Content-Type\":\"application/json\"}",
+            "requestContent": "{\"name\":\"web\", \"active\":\"true\", \"events\":[\"push\", \"pull_request\", \"issue_comment\"], \"config\": {\"secret\":\"{{{secret}}}\", \"url\": \"{{{payloadUrl}}}\", \"content_type\": \"json\"}}",
             "resultSelector": "jsonpath:$"
           },
           {
             "target": "deletewebhook",
-            "endpointUrl": "{{{endpoint.url}}}api/v3/repos/:owner/:repo/hooks/:hook_id",
+            "endpointUrl": "{{{endpoint.url}}}api/v3/repos/{{{definition}}}/hooks/{{{webHookId}}}",
             "requestVerb": "Delete",
-            "requestContent": "{\"eventType\":\"rmwebhook-remove\", \"resource\": {\"webHookName\" : \"{{{webHookName}}}\" }}",
-            "resultSelector": "jsonpath:$"
+            "requestHeader": "{\"Content-Type\":\"application/json\"}",
+            "resultSelector": "none"
           },
           {
             "target": "listwebhook",
-            "endpointUrl": "{{{endpoint.url}}}api/v3/repos/:owner/:repo/hooks",
+            "endpointUrl": "{{{endpoint.url}}}api/v3/repos/{{{definition}}}/hooks",
             "requestVerb": "Get",
-            "requestContent": "{\"eventType\":\"rmwebhook-list\", \"resource\": {}}",
-            "resultSelector": "jsonpath:$.ReleaseWebHooks[*]",
-            "resultTemplate": "{ \"value\" : \"{{{ PayloadUrl }}}\", \"displayValue\" : \"{{{ WebHookName }}}\" }"
+            "requestHeader": "{\"Content-Type\":\"application/json\"}",
+            "resultSelector": "jsonpath:$.[*]",
+            "resultTemplate": "{ \"value\" : \"{{{config.url}}}\", \"displayValue\" : \"{{{config.url}}}\" }"
           }
         ],
         "browsableArtifactTypeMapping": {
@@ -250,6 +251,7 @@
         },
         "ArtifactTriggerConfiguration" : {
             "isTriggerSupported": true,
+            "isTriggerSupportedOnlyInHosted": true,
             "isWebhookSupportedAtServerLevel": false,
             "resources": {
               "TriggerDisabledMessage": "i18n:Enabling the trigger will create a new release every time there is a change on the Github Enterprise Repo"
