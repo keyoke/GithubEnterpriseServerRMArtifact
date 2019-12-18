@@ -90,18 +90,30 @@ async function run() {
         tl.debug('Getting agent proxy configuration.');
 
         // Get the proxy configured for the DevOps Agent
-        const proxy : tl.ProxyConfiguration | null = tl.getHttpProxyConfiguration();
-        // Is a Proxy set?
-        if(proxy)
+        const agentProxy : tl.ProxyConfiguration | null = tl.getHttpProxyConfiguration();
+        const httpProxy : string | undefined = process.env.HTTP_PROXY;
+        const httpsProxy : string | undefined = process.env.HTTPS_PROXY;
+
+        if(httpProxy)
         {
-            tl.debug('Agent proxy is set.');
+            tl.debug(`Environment Variable HTTP_PROXY set to '${httpProxy}'.`);
+        }
+        if(httpsProxy)
+        {
+            tl.debug(`Environment Variable HTTPS_PROXY set to '${httpsProxy}'.`);
+        }
+
+        // Is a Proxy set?
+        if(agentProxy)
+        {
+            tl.debug(`Agent proxy is set to '${agentProxy.proxyUrl}'.`);
 
             // Get THe proxy Url
-            var proxyUrl = url.parse(proxy.proxyUrl);
+            var proxyUrl = url.parse(agentProxy.proxyUrl);
 
             // Is this needed? or is this already included in the url?
-            if (proxy.proxyUsername && proxy.proxyPassword) {
-                proxyUrl.auth = proxy.proxyUsername + ':' + proxy.proxyPassword;
+            if (agentProxy.proxyUsername && agentProxy.proxyPassword) {
+                proxyUrl.auth = agentProxy.proxyUsername + ':' + agentProxy.proxyPassword;
             }
             
             tl.debug('Configuring git proxy.');
