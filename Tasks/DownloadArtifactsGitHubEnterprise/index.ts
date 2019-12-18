@@ -113,10 +113,9 @@ async function run() {
         // Make sure we are not using credential helper as the interactive prompt as blocks this task
         const credentialHelper = git.getConfigSync('credential.helper');
 
-        tl.debug(`credential-helper is set to '${credentialHelper}'.`);
         if(credentialHelper && credentialHelper.trim() !== "")
         {
-            throw new Error('If credential helper is enabled the interactive prompt can block this task.');
+            tl.debug(`credential-helper is set to '${credentialHelper}', when a credential helper is enabled the interactive prompt can block this task.`);
         }
 
         tl.debug('Git repository initialization completed successfully.');
