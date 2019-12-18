@@ -115,7 +115,7 @@ async function run() {
 
         if(credentialHelper && credentialHelper.trim() !== "")
         {
-            tl.debug(`credential-helper is set to '${credentialHelper}', when a credential helper is enabled the interactive prompt can block this task.`);
+            console.log(`Git credential-helper is set to '${credentialHelper}', when a credential helper is enabled the interactive prompt can block this task.`);
         }
 
         tl.debug('Git repository initialization completed successfully.');

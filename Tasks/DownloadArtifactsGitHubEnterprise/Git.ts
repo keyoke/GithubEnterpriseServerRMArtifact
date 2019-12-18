@@ -41,7 +41,7 @@ export class Git extends events.EventEmitter implements IGit {
             version = lineColumns[lineColumns.length-1];
         }
 
-        return version;
+        return this.trimWhitespace(version);
     }
 
     public initSync()  : boolean {
@@ -88,9 +88,7 @@ export class Git extends events.EventEmitter implements IGit {
             value = outputLines[0];
         }
 
-        return value;
-
-        return (result.code == 0 ? result.stdout : "");
+        return this.trimWhitespace(value);
     }
 
     public async fetch(branch : string) : Promise<boolean> {
@@ -208,5 +206,16 @@ export class Git extends events.EventEmitter implements IGit {
 
         tl.debug(`Completed get Git path.`);
         return gitPath;
+    }
+
+    private trimWhitespace(value? : string) : string {
+        if(value)
+        {
+            return value.trim();
+        }
+        else
+        {
+            return "";
+        }
     }
 }
