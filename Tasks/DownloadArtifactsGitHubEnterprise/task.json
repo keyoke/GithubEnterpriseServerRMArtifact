@@ -8,12 +8,15 @@
     "category": "Deploy",
     "visibility": ["Release"],
     "demands": [],
-    "runsOn": ["Agent"],
-    "preview": true,
+    "runsOn": [
+      "Agent",
+      "MachineGroup"
+    ],
+    "preview": false,
     "author": "soft-cor",
     "version": {
         "Major": 0,
-        "Minor": 123,
+        "Minor": 125,
         "Patch": 0
     },
     "minimumAgentVersion": "1.99.0",
@@ -62,12 +65,17 @@
           },
           {
             "name": "submodules",
-            "type": "string",
+            "type": "pickList",
             "label": "Checkout Submodules",
             "defaultValue": "false",
             "required": true,
             "properties": {
               "EditableOptions": "True"
+            },
+            "options": {
+              "False": "None",
+              "True": "Top-level submodules only",
+              "Recursive": "Any nested submodules within"
             },
             "helpMarkDown": "Checkout Submodules"
           },
@@ -85,7 +93,7 @@
             "name": "downloadPath",
             "type": "string",
             "label": "Download Path",
-            "defaultValue": "",
+            "defaultValue": "$(System.ArtifactsDirectory)",
             "required": true,
             "helpMarkDown": "Path on the agent machine where the artifacts will be downloaded"
           }
