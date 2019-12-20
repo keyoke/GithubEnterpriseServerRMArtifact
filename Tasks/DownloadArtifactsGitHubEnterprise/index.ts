@@ -179,10 +179,8 @@ async function run() {
         if(submodules)
         {
             tl.debug(`Downloading submodules`);
-            // Sync submodules
-            let syncOptions : Array<string> = [
-                '--recursive'
-            ]; 
+            // Sync init submodules
+            let syncOptions : Array<string> = []; 
             // sync update options
             let updateOptions : Array<string> = [
                 '--init', 
@@ -199,6 +197,7 @@ async function run() {
             if(submodules === "Recursive")
             {
                 tl.debug('Submodules Downloading recursively.');
+                syncOptions.push('--recursive');
                 updateOptions.push('--recursive'); 
             }else if(submodules === "True")
             {

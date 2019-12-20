@@ -2,7 +2,7 @@
   "manifestVersion": 1,
   "id": "githubenterprise-custom-release-artifact-extension",
   "publisher": "soft-cor",
-  "version": "0.0.125",
+  "version": "0.0.126",
   "name": "GithubEnterprise Release Artifact",
   "description": "Add support for GitHubEnterprise as a release artifact",
   "public": false,
