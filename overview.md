@@ -4,4 +4,4 @@ This extension provides a native integration experience for GitHub Enterprise wh
 While in Preview the following functionality is still under development.
 * Add Git-LFS support
 * Add support for OAuth Authentication
-* Add ability to create GitHub WebHooks automatically for Triggering Releases in both offline and online scenarios
+* Add ability to create GitHub WebHooks automatically for triggering releases in both offline and online scenarios
