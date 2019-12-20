@@ -2,11 +2,27 @@
   "manifestVersion": 1,
   "id": "githubenterprise-custom-release-artifact-extension",
   "publisher": "soft-cor",
-  "version": "0.0.126",
+  "version": "0.0.129",
   "name": "GithubEnterprise Release Artifact",
-  "description": "Add support for GitHubEnterprise as a release artifact",
-  "public": false,
+  "description": "Add support for GitHubEnterprise as a release artifact for Release Pipelines",
+  "public": true,
+  "galleryFlags": [
+    "Preview"
+  ],
   "categories": [ "Azure Pipelines" ],
+  "content": {
+    "details": {
+        "path": "overview.md"
+    }
+  },
+  "tags": [
+    "github",
+    "enterprise",
+    "continuos",
+    "release",
+    "deploy",
+    "cd"
+  ],
   "targets": [
     {
       "id": "Microsoft.VisualStudio.Services"
