@@ -41,6 +41,8 @@ async function run() {
         const repository: string | undefined = tl.getInput("definition", false);
         const branch: string | undefined = tl.getInput("branch", false);
         const commitId: string | undefined = tl.getInput("version", false);
+        const submodules: string | undefined = tl.getInput("submodules", false);
+        const fetchDepth: string | undefined = tl.getInput("fetchDepth", false);
         const downloadPath: string | undefined = tl.getInput("downloadPath", false);
 
         // Verify artifact download path is set
@@ -138,16 +140,78 @@ async function run() {
         git.addRemoteSync('origin', gheRepoUrl);
     
         tl.debug('Fetching remote origin.');
-    
+
+        let fetchOptions : Array<string> = [
+            '--tags',
+            '--prune',
+            '--progress',
+            '--no-recurse-submodules'
+        ];
+        
+        // included Fetch depth if it was supplied
+        if(fetchDepth && fetchDepth.trim() !== "")
+        {
+            fetchOptions.push("--depth", fetchDepth); 
+        }
+
         // Fetch git repo from origin
-        await git.fetch('origin'); 
+        await git.fetch('origin', fetchOptions); 
 
         tl.debug('Completed fetching remote origin.');
 
         tl.debug(`Starting git checkout for desired commit - ${commitId}`);
 
+        var checkoutOptions : Array<string> = [
+            '--progress', 
+            '--force'
+        ];   
+
+        // included Fetch depth if it was supplied
+        if(fetchDepth && fetchDepth.trim() !== "")
+        {
+            checkoutOptions.push("--depth", fetchDepth); 
+        }
+
         // Checkout the specific commit from the repo
-        await git.checkout(commitId);
+        await git.checkout(commitId, checkoutOptions);
+
+        // download submodules
+        if(submodules)
+        {
+            tl.debug(`Downloading submodules`);
+            // Sync submodules
+            let syncOptions : Array<string> = [
+                '--recursive'
+            ]; 
+            // sync update options
+            let updateOptions : Array<string> = [
+                '--init', 
+                '--force'
+            ];
+
+            // included Fetch depth if it was supplied
+            if(fetchDepth && fetchDepth.trim() !== "")
+            {
+                updateOptions.push(`--depth=${fetchDepth}`); 
+            }
+
+            // Do we fetch only top level submodules or do we fetch recursively?
+            if(submodules === "Recursive")
+            {
+                tl.debug('Submodules Downloading recursively.');
+                updateOptions.push('--recursive'); 
+            }else if(submodules === "True")
+            {
+                tl.debug('Submodules Downloading top level only.');
+            }
+
+            tl.debug('Submodule Initialization.');
+            // Initiliaze for submodule sync
+            await git.submodulesync(syncOptions);
+            tl.debug('Submodule Update.');
+            // pdate submodules
+            await git.submoduleupdate(updateOptions);
+        }
 
         tl.debug(`Completed git checkout for desired commit - ${commitId}`);
     }

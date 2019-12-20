@@ -24,7 +24,7 @@
           },
           {
             "name": "definition",
-            "type": "pickList",
+            "type": "string",
             "label": "Repository",
             "defaultValue": "",
             "required": true,
@@ -35,7 +35,7 @@
             },
             {
             "name": "branch",
-            "type": "pickList",
+            "type": "string",
             "label": "Branch",
             "defaultValue": "",
             "required": true,
@@ -46,7 +46,7 @@
           },
           {
             "name": "version",
-            "type": "pickList",
+            "type": "string",
             "label": "Commit Id",
             "defaultValue": "",
             "required": true,
@@ -54,6 +54,27 @@
               "EditableOptions": "True"
             },
             "helpMarkDown": "Commit id"
+          },
+          {
+            "name": "submodules",
+            "type": "string",
+            "label": "Checkout Submodules",
+            "defaultValue": "false",
+            "required": true,
+            "properties": {
+              "EditableOptions": "True"
+            },
+            "helpMarkDown": "Checkout Submodules"
+          },
+          {
+            "name": "fetchDepth",
+            "label": "Shallow fetch depth",
+            "type": "string",
+            "required": true,
+            "properties": {
+              "EditableOptions": "True"
+            },
+            "helpMarkDown": "Limits fetching to the specified number of commits from the tip of each remote branch history."
           },
           {
             "name": "downloadPath",

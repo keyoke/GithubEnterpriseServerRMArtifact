@@ -131,6 +131,46 @@
             }
           },
           {
+            "id": "checkoutSubmodules",
+            "name": "i18n: Checkout submodules",
+            "description": "i18n: Checkout submodules",
+            "inputMode": "checkbox",
+            "isConfidential": false,
+            "hasDynamicValueInformation": false,
+            "validation": {
+              "isRequired": false
+            }
+          },
+          {
+            "id": "checkoutNestedSubmodules",
+            "name": "i18n: Recursion level",
+            "description": "i18n: Recursion level",
+            "inputMode": "Combo",
+            "isConfidential": false,
+            "hasDynamicValueInformation": false,
+            "validation": {
+              "isRequired": false
+            },
+            "properties": {
+              "visibleRule": "checkoutSubmodules == true"
+            },
+            "values": {
+              "inputId": "checkoutNestedSubmodulesValues",
+              "defaultValue": true,
+              "isLimitedToPossibleValues": true,
+              "possibleValues": [
+                {
+                  "value": false,
+                  "displayValue": "i18n:Top-level submodules only"
+                },
+                {
+                  "value": true,
+                  "displayValue": "i18n:Any nested submodules within"
+                }
+              ]
+            }
+          },
+          {
             "id": "defaultVersionSpecific",
             "name": "i18n: Commit",
             "description": "Default to a specific commit",
@@ -150,6 +190,17 @@
             },
             "properties": {
               "visibleRule": "defaultVersionType == specificVersionType"
+            }
+          },
+          {
+            "id": "fetchDepth",
+            "name": "i18n:Shallow fetch depth",
+            "description": "i18n: Limits fetching to the specified number of commits from the tip of each remote branch history.",
+            "inputMode": "textbox",
+            "isConfidential": false,
+            "hasDynamicValueInformation": false,
+            "validation": {
+              "isRequired": false
             }
           },
           {
@@ -176,8 +227,7 @@
           "connection": "{{{connection}}}",
           "definition": "{{{definition}}}",
           "submodules": "{{#equals checkoutSubmodules 'true' 1}}{{#equals checkoutNestedSubmodules 'true' 1}}Recursive{{else}}True{{/equals}}{{/equals}}",
-          "fetchDepth": "{{{fetchDepth}}}",
-          "lfs": "{{{gitLfsSupport}}}"
+          "fetchDepth": "{{{fetchDepth}}}"
         },
         "dataSourceBindings": [
           {
