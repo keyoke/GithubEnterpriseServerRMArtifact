@@ -2,8 +2,8 @@
   "manifestVersion": 1,
   "id": "githubenterprise-custom-release-artifact-extension",
   "publisher": "soft-cor",
-  "version": "0.0.129",
-  "name": "GithubEnterprise Release Artifact",
+  "version": "0.0.131",
+  "name": "GitHubEnterprise Release Artifact",
   "description": "Add support for GitHubEnterprise as a release artifact for Release Pipelines",
   "public": true,
   "galleryFlags": [
@@ -18,7 +18,7 @@
   "tags": [
     "github",
     "enterprise",
-    "continuos",
+    "continuous",
     "release",
     "deploy",
     "cd"

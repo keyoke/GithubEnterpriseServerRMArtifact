@@ -165,13 +165,7 @@ async function run() {
             '--progress', 
             '--force'
         ];   
-
-        // included Fetch depth if it was supplied
-        if(fetchDepth && fetchDepth.trim() !== "")
-        {
-            checkoutOptions.push("--depth", fetchDepth); 
-        }
-
+        
         // Checkout the specific commit from the repo
         await git.checkout(commitId, checkoutOptions);
 

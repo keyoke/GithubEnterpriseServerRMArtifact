@@ -3,16 +3,16 @@
     "id": "6a23cb82-09af-48a3-bec7-0d30ca0c25e7",
     "name": "DownloadArtifactsGitHubEnterprise",
     "friendlyName": "Download Artifacts - GitHub Enterprise",
-    "description": "Download GithubEnterprise Artifact",
+    "description": "Download GitHubEnterprise Artifact",
     "helpMarkDown": "",
     "category": "Utility",
     "author": "soft-cor",
     "version": {
         "Major": 0,
-        "Minor": 117,
+        "Minor": 119,
         "Patch": 0
     },
-    "instanceNameFormat": "Download Artifacts - Github Enterprise",
+    "instanceNameFormat": "Download Artifacts - GitHub Enterprise",
     "inputs": [
             {
             "name": "connection",
