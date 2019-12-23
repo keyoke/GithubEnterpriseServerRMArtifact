@@ -4,7 +4,7 @@
   "publisher": "soft-cor",
   "version": "0.0.142",
   "name": "GitHub Enterprise Release Artifact",
-  "description": "Add support for GitHub Enterprise repositories as a release artifact for Release Pipelines",
+  "description": "Add support for GitHub Enterprise repositories as a artifact for Release Pipelines",
   "public": true,
   "galleryFlags": [
     "Preview"
