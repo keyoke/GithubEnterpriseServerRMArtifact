@@ -41,6 +41,8 @@ async function run() {
         const repository: string | undefined = tl.getInput("definition", false);
         const branch: string | undefined = tl.getInput("branch", false);
         const commitId: string | undefined = tl.getInput("version", false);
+        const submodules: string | undefined = tl.getInput("submodules", false);
+        const fetchDepth: string | undefined = tl.getInput("fetchDepth", false);
         const downloadPath: string | undefined = tl.getInput("downloadPath", false);
 
         // Verify artifact download path is set
@@ -90,18 +92,30 @@ async function run() {
         tl.debug('Getting agent proxy configuration.');
 
         // Get the proxy configured for the DevOps Agent
-        const proxy : tl.ProxyConfiguration | null = tl.getHttpProxyConfiguration();
-        // Is a Proxy set?
-        if(proxy)
+        const agentProxy : tl.ProxyConfiguration | null = tl.getHttpProxyConfiguration();
+        const httpProxy : string | undefined = process.env.HTTP_PROXY;
+        const httpsProxy : string | undefined = process.env.HTTPS_PROXY;
+
+        if(httpProxy)
         {
-            tl.debug('Agent proxy is set.');
+            tl.debug(`Environment Variable HTTP_PROXY set to '${httpProxy}'.`);
+        }
+        if(httpsProxy)
+        {
+            tl.debug(`Environment Variable HTTPS_PROXY set to '${httpsProxy}'.`);
+        }
+
+        // Is a Proxy set?
+        if(agentProxy)
+        {
+            tl.debug(`Agent proxy is set to '${agentProxy.proxyUrl}'.`);
 
             // Get THe proxy Url
-            var proxyUrl = url.parse(proxy.proxyUrl);
+            var proxyUrl = url.parse(agentProxy.proxyUrl);
 
             // Is this needed? or is this already included in the url?
-            if (proxy.proxyUsername && proxy.proxyPassword) {
-                proxyUrl.auth = proxy.proxyUsername + ':' + proxy.proxyPassword;
+            if (agentProxy.proxyUsername && agentProxy.proxyPassword) {
+                proxyUrl.auth = agentProxy.proxyUsername + ':' + agentProxy.proxyPassword;
             }
             
             tl.debug('Configuring git proxy.');
@@ -113,10 +127,9 @@ async function run() {
         // Make sure we are not using credential helper as the interactive prompt as blocks this task
         const credentialHelper = git.getConfigSync('credential.helper');
 
-        tl.debug(`credential-helper is set to '${credentialHelper}'.`);
         if(credentialHelper && credentialHelper.trim() !== "")
         {
-            throw new Error('If credential helper is enabled the interactive prompt can block this task.');
+            console.log(`Git credential-helper is set to '${credentialHelper}', when a credential helper is enabled the interactive prompt can block this task.`);
         }
 
         tl.debug('Git repository initialization completed successfully.');
@@ -127,16 +140,71 @@ async function run() {
         git.addRemoteSync('origin', gheRepoUrl);
     
         tl.debug('Fetching remote origin.');
-    
+
+        let fetchOptions : Array<string> = [
+            '--tags',
+            '--prune',
+            '--progress',
+            '--no-recurse-submodules'
+        ];
+        
+        // included Fetch depth if it was supplied
+        if(fetchDepth && fetchDepth.trim() !== "")
+        {
+            fetchOptions.push("--depth", fetchDepth); 
+        }
+
         // Fetch git repo from origin
-        await git.fetch('origin'); 
+        await git.fetch('origin', fetchOptions); 
 
         tl.debug('Completed fetching remote origin.');
 
         tl.debug(`Starting git checkout for desired commit - ${commitId}`);
 
+        var checkoutOptions : Array<string> = [
+            '--progress', 
+            '--force'
+        ];   
+        
         // Checkout the specific commit from the repo
-        await git.checkout(commitId);
+        await git.checkout(commitId, checkoutOptions);
+
+        // download submodules
+        if(submodules)
+        {
+            tl.debug(`Downloading submodules`);
+            // Sync init submodules
+            let syncOptions : Array<string> = []; 
+            // sync update options
+            let updateOptions : Array<string> = [
+                '--init', 
+                '--force'
+            ];
+
+            // included Fetch depth if it was supplied
+            if(fetchDepth && fetchDepth.trim() !== "")
+            {
+                updateOptions.push(`--depth=${fetchDepth}`); 
+            }
+
+            // Do we fetch only top level submodules or do we fetch recursively?
+            if(submodules === "Recursive")
+            {
+                tl.debug('Submodules Downloading recursively.');
+                syncOptions.push('--recursive');
+                updateOptions.push('--recursive'); 
+            }else if(submodules === "True")
+            {
+                tl.debug('Submodules Downloading top level only.');
+            }
+
+            tl.debug('Submodule Initialization.');
+            // Initiliaze for submodule sync
+            await git.submodulesync(syncOptions);
+            tl.debug('Submodule Update.');
+            // pdate submodules
+            await git.submoduleupdate(updateOptions);
+        }
 
         tl.debug(`Completed git checkout for desired commit - ${commitId}`);
     }

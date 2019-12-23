@@ -41,7 +41,7 @@ export class Git extends events.EventEmitter implements IGit {
             version = lineColumns[lineColumns.length-1];
         }
 
-        return version;
+        return this.trimWhitespace(version);
     }
 
     public initSync()  : boolean {
@@ -88,36 +88,85 @@ export class Git extends events.EventEmitter implements IGit {
             value = outputLines[0];
         }
 
-        return value;
-
-        return (result.code == 0 ? result.stdout : "");
+        return this.trimWhitespace(value);
     }
 
-    public async fetch(branch : string) : Promise<boolean> {
+    public async fetch(branch : string, options : Array<string>) : Promise<boolean> {
         var args : Array<string> = [
-                                        'fetch',
-                                        '--tags', 
-                                        '--prune', 
-                                        '--progress',
-                                        '--no-recurse-submodules',
-                                        branch
+                                        'fetch'
                                     ];
-        
+
+        // Add the provided Git options to our arg list
+        options.map((opt)=>{
+            args.push(opt);
+        });
+
+        // Add the named git argument
+        args.push(branch);
+
+        // Add auth header if needed
         this.addAuthArgs(args);
+
+        // execute the command
         let code = await this.exec(args);
         
         return (code == 0 ? true : false);
     }
 
-    public async checkout(commitId : string)  : Promise<boolean> {
+    public async checkout(commitId : string, options : Array<string>)  : Promise<boolean> {
         var args : Array<string> = [
-                                        'checkout',
-                                        '--progress', 
-                                        '--force', 
-                                        commitId
+                                        'checkout'
                                     ];    
                                     
+        // Add the provided Git options to our arg list
+        options.map((opt)=>{
+            args.push(opt);
+        });
+
+        // Add the named git argument
+        args.push(commitId);
+
+        // Add auth header if needed
         this.addAuthArgs(args);
+
+        // execute the command
+        let code = await this.exec(args);
+        
+        return (code == 0 ? true : false);
+    }
+
+    public async submodulesync(options : Array<string>)  : Promise<boolean> {
+        var args : Array<string> = [
+                                        'submodule',
+                                        'sync'
+                                    ];    
+                                    
+        // Add the provided Git options to our arg list
+        options.map((opt)=>{
+            args.push(opt);
+        });
+
+        // execute the command
+        let code = await this.exec(args);
+        
+        return (code == 0 ? true : false);
+    }
+
+    public async submoduleupdate(options : Array<string>)  : Promise<boolean> {
+        var args : Array<string> = [
+                                        'submodule', 
+                                        'update'
+                                    ];    
+                                    
+        // Add the provided Git options to our arg list
+        options.map((opt)=>{
+            args.push(opt);
+        });
+
+        // Add auth header if needed
+        this.addAuthArgs(args);
+
+        // execute the command
         let code = await this.exec(args);
         
         return (code == 0 ? true : false);
@@ -208,5 +257,16 @@ export class Git extends events.EventEmitter implements IGit {
 
         tl.debug(`Completed get Git path.`);
         return gitPath;
+    }
+
+    private trimWhitespace(value? : string) : string {
+        if(value)
+        {
+            return value.trim();
+        }
+        else
+        {
+            return "";
+        }
     }
 }
