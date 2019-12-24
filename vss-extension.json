@@ -2,7 +2,7 @@
   "manifestVersion": 1,
   "id": "githubenterprise-custom-release-artifact-extension",
   "publisher": "soft-cor",
-  "version": "0.0.142",
+  "version": "0.0.146",
   "name": "GitHub Enterprise Release Artifact",
   "description": "Add support for GitHub Enterprise repositories as a artifact for Release Pipelines",
   "public": true,
@@ -64,7 +64,7 @@
         "name": "GitHubEnterprise",
         "displayName": "GitHub Enterprise",
         "endpointTypeId": "githubenterprise",
-        "uniqueSourceIdentifier": "{{connection}}:{{definition}}:{{branch}}",
+        "uniqueSourceIdentifier": "{{connection}}:{{definition}}",
         "downloadTaskId": "6a23cb82-09af-48a3-bec7-0d30ca0c25e7",
         "artifactType": "SourceControl",
         "inputDescriptors": [
@@ -298,7 +298,7 @@
           },
           {
             "target": "deletewebhook",
-            "endpointUrl": "{{{endpoint.url}}}api/v3/repos/{{{definition}}}/hooks/{{{webHookId}}}",
+            "endpointUrl": "{{{endpoint.url}}}api/v3/repos/{{{definition}}}/hooks/{{{id}}}",
             "requestVerb": "Delete",
             "requestHeader": "{\"Content-Type\":\"application/json\"}",
             "resultSelector": "none"
@@ -318,9 +318,8 @@
         "ArtifactTriggerConfiguration" : {
             "isTriggerSupported": true,
             "isTriggerSupportedOnlyInHosted": true,
-            "isWebhookSupportedAtServerLevel": false,
             "resources": {
-              "TriggerDisabledMessage": "i18n:Enabling the trigger will create a new release every time there is a change on the Github Enterprise Repo"
+              "TriggerDisabledMessage": "Enabling the trigger will create a new release every time there is a change on the Github Enterprise Repo"
             },
             "payloadHashHeaderName": "X-Hub-Signature",
             "webhookPayloadMapping" : {
