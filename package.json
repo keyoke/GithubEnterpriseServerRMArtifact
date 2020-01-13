@@ -1,0 +1,8 @@
+{
+  "scripts": {
+    "build": "tsc",
+    "publish:DownloadArtifactsGitHubEnterprise": "(for %f in (task.json,package.json,icon.png) do xcopy /y /i .\\Tasks\\DownloadArtifactsGitHubEnterprise\\%f .\\dist\\Tasks\\DownloadArtifactsGitHubEnterprise\\) && cd ./dist/Tasks/DownloadArtifactsGitHubEnterprise && npm install --only=production",
+    "publish": "npm run build && npm run publish:DownloadArtifactsGitHubEnterprise && tfx extension create --manifests vss-extension.json",
+    "test": "echo \"No tests yet...\""
+  }
+}

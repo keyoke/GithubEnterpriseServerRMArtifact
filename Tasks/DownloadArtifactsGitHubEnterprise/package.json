@@ -3,13 +3,6 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "scripts": {
-    "build": "tsc",
-    "watch": "tsc -w",
-    "build:production": "npm run build && npm prune --production",
-    "publish": "npm run build && cd ..\\..\\ && tfx extension create --manifests vss-extension.json",
-    "test": "echo \"No tests yet...\""
-  },
   "author": "Gareth Emslie",
   "license": "MIT",
   "dependencies": {

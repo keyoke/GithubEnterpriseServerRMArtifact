@@ -39,7 +39,7 @@
       "addressable": true
     },
     {
-      "path": "Tasks/DownloadArtifactsGitHubEnterprise"
+      "path": "dist/Tasks/DownloadArtifactsGitHubEnterprise"
     }
   ],
   "contributions": [
