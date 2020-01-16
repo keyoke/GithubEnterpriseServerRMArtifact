@@ -1,0 +1,21 @@
+{
+  "name": "download-artifacts-github-enterprise",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "author": "Gareth Emslie",
+  "license": "MIT",
+  "dependencies": {
+    "azure-pipelines-task-lib": "^2.9.3",
+    "events": "^3.0.0",
+    "fs": "0.0.1-security",
+    "os": "^0.1.1",
+    "shelljs": "^0.8.3"
+  },
+  "devDependencies": {
+    "@types/node": "^12.12.15",
+    "@types/q": "^1.5.2",
+    "@types/shelljs": "^0.8.6",
+    "typescript": "^3.3.3"
+  }
+}
