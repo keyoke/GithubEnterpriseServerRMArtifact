@@ -2,7 +2,7 @@
   "manifestVersion": 1,
   "id": "githubenterprise-custom-release-artifact-extension",
   "publisher": "soft-cor",
-  "version": "0.0.157",
+  "version": "0.0.158",
   "name": "GitHub Enterprise Release Artifact",
   "description": "Add support for GitHub Enterprise repositories as a artifact for Release Pipelines",
   "public": true,
@@ -13,7 +13,14 @@
   "content": {
     "details": {
         "path": "overview.md"
+    },
+    "license": {
+      "path": "LICENSE"
     }
+  },
+  "repository": {
+    "type": "git",
+    "uri": "https://github.com/keyoke/GithubEnterpriseServerRMArtifact"
   },
   "tags": [
     "github",
@@ -33,7 +40,37 @@
   "icons": {
     "default": "icon-githubenterprise-logo.png"
   },
+  "screenshots": [
+    {
+      "path": "images/screen1.png"
+    },
+    {
+      "path": "images/screen2.png"
+    },
+    {
+      "path": "images/screen3.png"
+    },
+    {
+      "path": "images/screen4.png"
+    }
+  ],
   "files": [
+    {
+      "path": "images/screen1.png",
+      "addressable": true
+    },
+    {
+        "path": "images/screen2.png",
+        "addressable": true
+    },
+    {
+        "path": "images/screen3.png",
+        "addressable": true
+    },
+    {
+        "path": "images/screen4.png",
+        "addressable": true
+    },
     {
       "path": "icon-githubenterprise-logo.png",
       "addressable": true
