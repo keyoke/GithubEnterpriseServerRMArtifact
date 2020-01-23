@@ -2,7 +2,7 @@
   "manifestVersion": 1,
   "id": "githubenterprise-custom-release-artifact-extension",
   "publisher": "soft-cor",
-  "version": "0.0.161",
+  "version": "1.0.1",
   "name": "GitHub Enterprise Release Artifact",
   "description": "Add support for GitHub Enterprise repositories as a artifact for Release Pipelines",
   "public": true,
@@ -285,44 +285,37 @@
         "dataSourceBindings": [
           {
             "target": "definition",
-            "endpointUrl":"{{endpoint.url}}api/v3/user/repos",
-            "resultSelector":"jsonpath:$.[*]",
+            "dataSourceName":"Repositories",
             "resultTemplate": "{ Value : \"{{{full_name}}}\", DisplayValue : \"{{{full_name}}}\" }"
           },
           {
             "target": "branch",
-            "endpointUrl":"{{endpoint.url}}api/v3/repos/{{{definition}}}/branches",
-            "resultSelector":"jsonpath:$.[*]",
+            "dataSourceName":"RepoBranches",
             "resultTemplate": "{ Value : \"{{{name}}}\", DisplayValue : \"{{{name}}}\" }"
           },
           {
             "target": "defaultVersionSpecific",
-            "endpointUrl":"{{endpoint.url}}api/v3/repos/{{{definition}}}/commits?sha={{branch}}",
-             "resultSelector":"jsonpath:$.[*]",
+            "dataSourceName":"Commits",
             "resultTemplate": "{ Value : \"{{{sha}}}\", DisplayValue : \"{{#stringLeft sha 8}}{{/stringLeft}} ({{#stringLeft commit.message 245}}{{/stringLeft}})\" }"
           },
           {
             "target": "versions",
-            "endpointUrl":"{{endpoint.url}}api/v3/repos/{{{definition}}}/commits?sha={{branch}}",
-             "resultSelector":"jsonpath:$.[*]",
+            "dataSourceName":"Commits",
             "resultTemplate": "{ Value : \"{{{sha}}}\", DisplayValue : \"{{#stringLeft sha 8}}{{/stringLeft}} ({{#stringLeft commit.message 245}}{{/stringLeft}})\" }"
           },
           {
             "target": "latestversion",
-            "endpointUrl":"{{{endpoint.url}}}api/v3/repos/{{{definition}}}/commits?sha={{version}}",
-            "resultSelector":"jsonpath:$.[0]",
+            "dataSourceName":"LatestCommit",
             "resultTemplate": "{ Value : \"{{{sha}}}\", DisplayValue : \"{{#stringLeft sha 8}}{{/stringLeft}} ({{#stringLeft commit.message 245}}{{/stringLeft}})\" }"
           },
           {
             "target": "artifacts",
-            "endpointUrl":"{{endpoint.url}}api/v3/repos/{{{definition}}}/contents?ref={{#equals defaultVersionType 'specificVersionType'}}{{version}}{{else}}{{branch}}{{/equals}}",
-            "resultSelector":"jsonpath:$.[*]",
+            "dataSourceName":"Artifacts",
             "resultTemplate": "{ \"value\" : \"{{{path}}}\",  \"displayValue\" : \"{{{name}}}\",  \"data\" : { {{#equals type 'dir'}} \"artifactType\": \"folder\" {{else}} \"itemType\": \"file\" {{/equals}} } }"
           },
           {
             "target": "artifactItems",
-            "endpointUrl":"{{endpoint.url}}api/v3/repos/{{{definition}}}/contents/{{itemPath}}?ref={{#equals defaultVersionType 'specificVersionType'}}{{version}}{{else}}{{branch}}{{/equals}}",
-            "resultSelector":"jsonpath:$.[*]",
+            "dataSourceName":"ArtifactItems",
             "resultTemplate": "{ \"value\" : \"{{{path}}}\",  \"displayValue\" : \"{{{name}}}\",  \"data\" : { {{#equals type 'dir'}} \"artifactType\": \"folder\" {{else}} \"itemType\": \"file\" {{/equals}} } }"
           },
           {
