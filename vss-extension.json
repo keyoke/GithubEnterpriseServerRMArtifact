@@ -2,12 +2,11 @@
   "manifestVersion": 1,
   "id": "githubenterprise-custom-release-artifact-extension",
   "publisher": "soft-cor",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "name": "GitHub Enterprise Release Artifact",
   "description": "Add support for GitHub Enterprise repositories as a artifact for Release Pipelines",
   "public": true,
   "galleryFlags": [
-    "Preview"
   ],
   "categories": [ "Azure Pipelines" ],
   "content": {
@@ -29,7 +28,8 @@
     "continuous",
     "release",
     "deploy",
-    "cd"
+    "cd",
+    "__DoNotDownload"
   ],
   "targets": [
     {
@@ -52,6 +52,9 @@
     },
     {
       "path": "images/screen4.png"
+    },
+    {
+      "path": "images/screen5.png"
     }
   ],
   "files": [
@@ -69,6 +72,10 @@
     },
     {
         "path": "images/screen4.png",
+        "addressable": true
+    },
+    {
+        "path": "images/screen5.png",
         "addressable": true
     },
     {
