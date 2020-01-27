@@ -2,7 +2,7 @@
   "manifestVersion": 1,
   "id": "githubenterprise-custom-release-artifact-extension",
   "publisher": "soft-cor",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "name": "GitHub Enterprise Release Artifact",
   "description": "Add support for GitHub Enterprise repositories as a artifact for Release Pipelines",
   "public": true,
@@ -33,7 +33,7 @@
   ],
   "targets": [
     {
-      "id": "Microsoft.VisualStudio.Services"
+      "id": "Microsoft.VisualStudio.Services.Cloud"
     }
   ],
   "demands": [ "contribution/ms.vss-endpoint.githubenterprise-endpoint-type" ],
