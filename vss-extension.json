@@ -2,7 +2,7 @@
   "manifestVersion": 1,
   "id": "githubenterprise-custom-release-artifact-extension",
   "publisher": "soft-cor",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "name": "GitHub Enterprise Release Artifact",
   "description": "Add support for GitHub Enterprise repositories as a artifact for Release Pipelines",
   "public": true,
@@ -28,8 +28,7 @@
     "continuous",
     "release",
     "deploy",
-    "cd",
-    "__DoNotDownload"
+    "cd"
   ],
   "targets": [
     {
