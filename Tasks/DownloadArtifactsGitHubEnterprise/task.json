@@ -15,9 +15,9 @@
     "preview": false,
     "author": "soft-cor",
     "version": {
-        "Major": 0,
-        "Minor": 132,
-        "Patch": 0
+        "Major": 1,
+        "Minor": 0,
+        "Patch": 5
     },
     "minimumAgentVersion": "1.99.0",
     "instanceNameFormat": "Download Artifacts - GitHub Enterprise",
