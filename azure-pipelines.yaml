@@ -28,11 +28,16 @@ stages:
             npm run package -- --override="{\"version\": \"$(MajorVersion).$(MinorVersion).$(PatchVersion)\"}"
           displayName: 'npm install, build & package'
         - task: PowerShell@2
-          displayName: 'Tag GitHub Commit'
+          displayName: 'Tag Git Commit'
           inputs:
             targetType: 'inline'
             script: |
               git tag "v$(MajorVersion).$(MinorVersion).$(PatchVersion)"
+        - task: PowerShell@2
+          displayName: 'Push Git Tags'
+          inputs:
+            targetType: 'inline'
+            script: |
               git push --tags
         - task: GitHubRelease@1
           displayName: 'Publish Extension as GitHub Release'
