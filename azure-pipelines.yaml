@@ -25,12 +25,15 @@ stages:
             npm run package -- --override="{\"version\": \"$(MajorVersion).$(MinorVersion).$(PatchVersion)\"}"
           displayName: 'npm install, build & package'
         - task: GitHubRelease@1
+          displayName: 'Publish Extension as GitHub Release'
           inputs:
             gitHubConnection: 'github.com_keyoke'
             repositoryName: '$(Build.Repository.Name)'
             action: 'create'
             target: '$(Build.SourceVersion)'
             tagSource: 'gitTag'
+            tagPattern: 'v$(MajorVersion).$(MinorVersion).$(PatchVersion)'
             assets: '$(System.DefaultWorkingDirectory)/dist/*.vsix'
-            addChangeLog: false
+            changeLogCompareToRelease: 'lastFullRelease'
+            changeLogType: 'commitBased'
   
