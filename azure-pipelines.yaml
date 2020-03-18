@@ -9,6 +9,10 @@ stages:
         displayName: Build & Package Extension
         pool:
           vmImage: 'windows-latest'
+        variables:
+          MajorVersion : 1
+          MinorVersion : 0
+          PatchVersion : $[counter(format('{0}.{1}',variables['MajorVersion'],variables['MinorVersion']),0)]
         steps:
         - task: NodeTool@0
           inputs:
@@ -18,6 +22,6 @@ stages:
           displayName: 'Install Node CLI for Azure DevOps'
         - script: |
             npm install
-            npm run package
+            npm run package -- --override="{\"version\": \"$(MajorVersion).$(MinorVersion).$(PatchVersion)\"}"
           displayName: 'npm install, build & package'
   
