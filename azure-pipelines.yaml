@@ -1,4 +1,6 @@
-trigger: none
+trigger:
+- master
+pr: none
 stages:
   - stage : build_package
     displayName: Build & Package Extension
