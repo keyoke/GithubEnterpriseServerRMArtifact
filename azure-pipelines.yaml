@@ -1,5 +1,5 @@
 trigger:
-  - users/keyoke/servicing
+  - master
   
 stages:
   - stage : build_package
@@ -48,7 +48,7 @@ stages:
             target: '$(Build.SourceVersion)'
             tagSource: 'gitTag'
             tagPattern: 'v$(MajorVersion).$(MinorVersion).$(PatchVersion)'
-            assets: '$(System.DefaultWorkingDirectory)/dist/*.vsix'
+            assets: '$(System.DefaultWorkingDirectory)\GithubEnterpriseServerRMArtifact\dist\*.vsix'
             changeLogCompareToRelease: 'lastFullRelease'
             changeLogType: 'commitBased'
   
