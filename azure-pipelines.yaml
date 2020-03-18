@@ -8,7 +8,7 @@ stages:
       - job : build_package
         displayName: Build & Package Extension
         pool:
-          vmImage: 'ubuntu-latest'
+          vmImage: 'windows-latest'
         steps:
         - task: NodeTool@0
           inputs:
