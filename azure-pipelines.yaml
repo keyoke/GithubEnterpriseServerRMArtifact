@@ -12,7 +12,7 @@ stages:
         variables:
           MajorVersion : 1
           MinorVersion : 0
-          PatchVersion : $[counter(format('{0}.{1}',variables['MajorVersion'],variables['MinorVersion']),0)]
+          PatchVersion : $[counter(format('{0}.{1}',variables['MajorVersion'],variables['MinorVersion']),6)]
         steps:
         - checkout: self
           persistCredentials: true
@@ -26,7 +26,7 @@ stages:
         - script: npm install
           displayName: 'Install Dependencies'
         - script: |
-            npm run package -- --override '{\"version\": \"$(MajorVersion).$(MinorVersion).$(PatchVersion)\"}'
+            npm run package -- --override {\"version\": \"$(MajorVersion).$(MinorVersion).$(PatchVersion)\"}
           displayName: 'Build & Package'
         - task: PowerShell@2
           displayName: 'Tag Git Commit'
