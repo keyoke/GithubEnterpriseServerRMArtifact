@@ -23,10 +23,11 @@ stages:
           displayName: 'Install Node.js'
         - script: npm install -g tfx-cli
           displayName: 'Install Node CLI for Azure DevOps'
+        - script: npm install
+          displayName: 'npm install package dependencies'
         - script: |
-            npm install
             npm run package -- --override="{\"version\": \"$(MajorVersion).$(MinorVersion).$(PatchVersion)\"}"
-          displayName: 'npm install, build & package'
+          displayName: 'npm run build & package'
         - task: PowerShell@2
           displayName: 'Tag Git Commit'
           inputs:
