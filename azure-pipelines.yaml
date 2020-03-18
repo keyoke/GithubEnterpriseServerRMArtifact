@@ -48,7 +48,7 @@ stages:
             target: '$(Build.SourceVersion)'
             tagSource: 'gitTag'
             tagPattern: 'v$(MajorVersion).$(MinorVersion).$(PatchVersion)'
-            assets: '$(System.DefaultWorkingDirectory)\GithubEnterpriseServerRMArtifact\dist\*.vsix'
+            assets: '$(System.DefaultWorkingDirectory)\dist\*.vsix'
             changeLogCompareToRelease: 'lastFullRelease'
             changeLogType: 'commitBased'
   
