@@ -14,6 +14,9 @@ stages:
           MinorVersion : 0
           PatchVersion : $[counter(format('{0}.{1}',variables['MajorVersion'],variables['MinorVersion']),0)]
         steps:
+        - checkout: self
+          persistCredentials: true
+          clean: true
         - task: NodeTool@0
           inputs:
             versionSpec: '10.x'
