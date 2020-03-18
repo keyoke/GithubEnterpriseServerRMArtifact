@@ -40,8 +40,6 @@ stages:
             targetType: 'inline'
             script: |
               git push --tags
-        - script: |
-            dir /s /b
         - task: GitHubRelease@1
           displayName: 'Publish Extension as Release'
           inputs:
