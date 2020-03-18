@@ -4,7 +4,7 @@ pr: none
 variables:
   MajorVersion : 1
   MinorVersion : 0
-  PatchVersion : $[counter(format('{0}.{1}',variables['MajorVersion'],variables['MinorVersion']), 6)]
+  PatchVersion : $[counter(format('ghe-extension-{0}.{1}',variables['MajorVersion'],variables['MinorVersion']), 6)]
 stages:
   - stage : build_package
     displayName: Build & Package Extension
