@@ -17,10 +17,22 @@
       "path": "LICENSE"
     }
   },
+  "links": {
+      "support": {
+          "uri": "https://blog.soft-cor.com"
+      }
+  },
   "repository": {
     "type": "git",
     "uri": "https://github.com/keyoke/GithubEnterpriseServerRMArtifact"
   },
+  "badges": [
+    {
+        "href": "https://dev.azure.com/softcores/GithubEnterpriseServerRMArtifact/_build?definitionId=1&_a=summary",
+        "uri": "https://dev.azure.com/softcores/GithubEnterpriseServerRMArtifact/_apis/build/status/keyoke.GithubEnterpriseServerRMArtifact?branchName=master",
+        "description": "Azure Pipeline for GithubEnterpriseServerRMArtifact"
+    }
+  ],
   "tags": [
     "github",
     "enterprise",
