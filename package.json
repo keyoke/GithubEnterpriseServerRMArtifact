@@ -3,6 +3,8 @@
     "postinstall": "cd ./Tasks/DownloadArtifactsGitHubEnterprise && npm install",
     "build": "tsc",
     "package:DownloadArtifactsGitHubEnterprise": "(for %f in (task.json,package.json,icon.png) do xcopy /y /i .\\Tasks\\DownloadArtifactsGitHubEnterprise\\%f .\\dist\\Tasks\\DownloadArtifactsGitHubEnterprise\\) && cd ./dist/Tasks/DownloadArtifactsGitHubEnterprise && npm install --only=production",
-    "package": "npm run build && npm run package:DownloadArtifactsGitHubEnterprise && tfx extension create --manifests vss-extension-service.json --output-path ./dist/ && tfx extension create --manifests vss-extension-server.json --output-path ./dist/"
+    "package:ServerVSIX": "npm run build && npm run package:DownloadArtifactsGitHubEnterprise && tfx extension create --manifests vss-extension-server.json --output-path ./dist/",
+    "package:ServiceVSIX": "npm run build && npm run package:DownloadArtifactsGitHubEnterprise && tfx extension create --manifests vss-extension-service.json --output-path ./dist/",
+    "package": "npm run package:ServerVSIX && npm run package:ServiceVSIX"
   }
 }
