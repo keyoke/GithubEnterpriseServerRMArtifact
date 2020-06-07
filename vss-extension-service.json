@@ -47,7 +47,10 @@
       "id": "Microsoft.VisualStudio.Services.Cloud"
     }
   ],
-  "demands": [ "contribution/ms.vss-endpoint.githubenterprise-endpoint-type" ],
+  "demands": [ 
+    "contribution/ms.vss-endpoint.githubenterprise-endpoint-type",
+    "api-version/3.0"
+  ],
   "icons": {
     "default": "icon-githubenterprise-logo.png"
   },
