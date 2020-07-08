@@ -44,7 +44,8 @@
   ],
   "targets": [
     {
-      "id": "Microsoft.TeamFoundation.Server"
+      "id": "Microsoft.TeamFoundation.Server",
+      "version": "[16.0,)"
     }
   ],
   "demands": [ 
