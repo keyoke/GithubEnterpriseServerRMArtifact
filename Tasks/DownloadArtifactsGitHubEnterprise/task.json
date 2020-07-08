@@ -19,7 +19,7 @@
         "Minor": 0,
         "Patch": 7
     },
-    "minimumAgentVersion": "1.99.0",
+    "minimumAgentVersion": "2.144.0",
     "instanceNameFormat": "Download Artifacts - GitHub Enterprise",
     "inputs": [
             {
