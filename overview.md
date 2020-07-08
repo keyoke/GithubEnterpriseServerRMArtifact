@@ -3,6 +3,9 @@ This extension provides a native integration experience for GitHub Enterprise Se
 
 Prior to the release of this extension Release Pipelines supported only Github.com as a release artifact. This meant that the only way to leverage artifacts originating directly from GitHub Enterprise Server during a release was to add a step to manually clone the repository using the Git CLI.  
 
+## Team Foundation Server 2018/2019 Support
+The extension which is published to the marketplace is supported for the Azure DevOps Service target only. If you wish to install this extension on TFS 2018 please download the latest server VSIX package i.e. soft-cor.githubenterprise-custom-release-artifact-server-extension-[version].vsix from the [GitHub Releases](https://github.com/keyoke/GithubEnterpriseServerRMArtifact/releases).
+
 ## Usage
 This extension requires you to first configure a service connection to connect to your GitHub Enterprise server. Once connected, you can link a source artifact from the a GitHub Enterprise Server repository and use these artifacts in your Release Pipeline.
 
