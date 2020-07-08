@@ -8,7 +8,7 @@
   "public": true,
   "galleryFlags": [
   ],
-  "categories": [ "Azure Pipelines" ],
+  "categories": [ "Build and release" ],
   "content": {
     "details": {
         "path": "overview.md"
