@@ -44,12 +44,13 @@
   ],
   "targets": [
     {
-      "id": "Microsoft.TeamFoundation.Server"
+      "id": "Microsoft.TeamFoundation.Server",
+      "version": "[16.0,)"
     }
   ],
   "demands": [ 
     "contribution/ms.vss-endpoint.githubenterprise-endpoint-type",
-    "api-version/3.0"
+    "api-version/4.0"
   ],
   "icons": {
     "default": "icon-githubenterprise-logo.png"
