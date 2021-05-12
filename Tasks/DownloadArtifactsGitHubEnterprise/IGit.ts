@@ -5,7 +5,7 @@ export interface IGit {
     addConfigSync(config_name : string, config_value : string) : boolean;
     getConfigSync(config_name : string) : string;
     fetch(branch : string, options : Array<string>) : Promise<boolean>;
-    getLatestCommitSync()  : Promise<string>;
+    getLatestCommitSync()  : string;
     checkout(commitId : string, options : Array<string>)  : Promise<boolean>;
     submoduleupdate(options : Array<string>)  : Promise<boolean>;
     submodulesync(options : Array<string>)  : Promise<boolean>;

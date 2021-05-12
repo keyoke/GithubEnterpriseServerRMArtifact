@@ -113,7 +113,7 @@ export class Git extends events.EventEmitter implements IGit {
         return (code == 0 ? true : false);
     }
 
-    public async getLatestCommitSync()  : Promise<string> {
+    public getLatestCommitSync()  : string {
         let commitId : string = "";
         var args : Array<string> = [
             "log",
