@@ -113,7 +113,7 @@ export class Git extends events.EventEmitter implements IGit {
         return (code == 0 ? true : false);
     }
 
-    public async checkout(commitId : string, options : Array<string>)  : Promise<boolean> {
+    public async checkout(options : Array<string>)  : Promise<boolean> {
         var args : Array<string> = [
                                         'checkout'
                                     ];    
@@ -122,12 +122,6 @@ export class Git extends events.EventEmitter implements IGit {
         options.map((opt)=>{
             args.push(opt);
         });
-
-        // Add the named git argument
-        if(commitId)
-        {
-            args.push(commitId);
-        }
 
         // Add auth header if needed
         this.addAuthArgs(args);
