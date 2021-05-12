@@ -157,7 +157,7 @@ async function run() {
         if(!commitId)
         {
             // Get the latest Commit Id
-            commitId = await git.getLatestCommitSync();
+            commitId = git.getLatestCommitSync();
         }
 
         tl.debug(`Starting git checkout for commit - ${commitId}`);
