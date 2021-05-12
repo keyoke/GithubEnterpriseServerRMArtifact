@@ -69,7 +69,7 @@
             "type": "pickList",
             "label": "Commit Id",
             "defaultValue": "",
-            "required": true,
+            "required": false,
             "properties": {
               "EditableOptions": "True"
             },
