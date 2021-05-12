@@ -153,14 +153,7 @@ async function run() {
 
         tl.debug('Completed fetching remote origin.');
         
-        // Do we have a commit id?
-        if(!commitId)
-        {
-            // Get the latest Commit Id
-            commitId = git.getLatestCommitSync();
-        }
-
-        tl.debug(`Starting git checkout for commit - ${commitId}`);
+        tl.debug(`Starting git checkout for commit.`);
 
         var checkoutOptions : Array<string> = [
             '--progress', 
@@ -207,7 +200,7 @@ async function run() {
             await git.submoduleupdate(updateOptions);
         }
 
-        tl.debug(`Completed git checkout for commit - ${commitId}`);
+        tl.debug(`Completed git checkout for commit.`);
     }
     catch (err) {
         tl.setResult(tl.TaskResult.Failed, err.message);

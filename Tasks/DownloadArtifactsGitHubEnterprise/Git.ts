@@ -113,26 +113,6 @@ export class Git extends events.EventEmitter implements IGit {
         return (code == 0 ? true : false);
     }
 
-    public getLatestCommitSync()  : string {
-        let commitId : string = "";
-        var args : Array<string> = [
-            "log",
-            "--pretty=format:'%H' -n 1"
-        ];    
-        
-        // Get the latest commit Id
-        let result : tr.IExecSyncResult = this.execSync(args);
-        
-        // Parse the git output
-        if(result.code == 0)
-        {
-            let outputLines: string[] = result.stdout.split(os.EOL);
-            commitId = outputLines[0];
-        }
-
-        return this.trimWhitespace(commitId);
-    }
-
     public async checkout(commitId : string, options : Array<string>)  : Promise<boolean> {
         var args : Array<string> = [
                                         'checkout'
@@ -144,7 +124,10 @@ export class Git extends events.EventEmitter implements IGit {
         });
 
         // Add the named git argument
-        args.push(commitId);
+        if(commitId)
+        {
+            args.push(commitId);
+        }
 
         // Add auth header if needed
         this.addAuthArgs(args);
