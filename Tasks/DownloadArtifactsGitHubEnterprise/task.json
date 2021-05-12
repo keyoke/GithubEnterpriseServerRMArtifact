@@ -17,7 +17,7 @@
     "version": {
         "Major": 1,
         "Minor": 0,
-        "Patch": 7
+        "Patch": 8
     },
     "minimumAgentVersion": "2.144.0",
     "instanceNameFormat": "Download Artifacts - GitHub Enterprise",
@@ -69,7 +69,7 @@
             "type": "pickList",
             "label": "Commit Id",
             "defaultValue": "",
-            "required": true,
+            "required": false,
             "properties": {
               "EditableOptions": "True"
             },

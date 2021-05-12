@@ -40,7 +40,7 @@ async function run() {
         // Get the GHE repository details
         const repository: string | undefined = tl.getInput("definition", false);
         const branch: string | undefined = tl.getInput("branch", false);
-        const commitId: string | undefined = tl.getInput("version", false);
+        let commitId: string | undefined = tl.getInput("version", false);
         const submodules: string | undefined = tl.getInput("submodules", false);
         const fetchDepth: string | undefined = tl.getInput("fetchDepth", false);
         const downloadPath: string | undefined = tl.getInput("downloadPath", false);
@@ -49,12 +49,6 @@ async function run() {
         if(!downloadPath)
         {
             throw new Error("Invalid downloadPath.");
-        }
-
-        // make sure we have a valid commit
-        if(!commitId)
-        {
-            throw new Error("Invalid version.");
         }
 
         tl.debug(`Checking if downloadPath folder '${downloadPath}' exists.`);
@@ -158,8 +152,15 @@ async function run() {
         await git.fetch('origin', fetchOptions); 
 
         tl.debug('Completed fetching remote origin.');
+        
+        // Do we have a commit id?
+        if(!commitId)
+        {
+            // Get the latest Commit Id
+            commitId = await git.getLatestCommitSync();
+        }
 
-        tl.debug(`Starting git checkout for desired commit - ${commitId}`);
+        tl.debug(`Starting git checkout for commit - ${commitId}`);
 
         var checkoutOptions : Array<string> = [
             '--progress', 
@@ -206,7 +207,7 @@ async function run() {
             await git.submoduleupdate(updateOptions);
         }
 
-        tl.debug(`Completed git checkout for desired commit - ${commitId}`);
+        tl.debug(`Completed git checkout for commit - ${commitId}`);
     }
     catch (err) {
         tl.setResult(tl.TaskResult.Failed, err.message);
