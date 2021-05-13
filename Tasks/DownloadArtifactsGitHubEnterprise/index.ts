@@ -40,7 +40,7 @@ async function run() {
         // Get the GHE repository details
         const repository: string | undefined = tl.getInput("definition", false);
         const branch: string | undefined = tl.getInput("branch", false);
-        const commitId: string | undefined = tl.getInput("version", false);
+        let commitId: string | undefined = tl.getInput("version", false);
         const submodules: string | undefined = tl.getInput("submodules", false);
         const fetchDepth: string | undefined = tl.getInput("fetchDepth", false);
         const downloadPath: string | undefined = tl.getInput("downloadPath", false);
@@ -153,16 +153,15 @@ async function run() {
 
         tl.debug('Completed fetching remote origin.');
         
-        tl.debug(`Starting git checkout for commit.`);
+        tl.debug(`Starting git checkout.`);
 
         var checkoutOptions : Array<string> = [
             '--progress', 
-            '--force',
-            `${commitId ? commitId : branch}`
+            '--force'
         ];   
         
         // Checkout the specific commit from the repo
-        await git.checkout(checkoutOptions);
+        await git.checkout(`${commitId ? commitId : branch}`, checkoutOptions);
 
         // download submodules
         if(submodules)
@@ -201,7 +200,13 @@ async function run() {
             await git.submoduleupdate(updateOptions);
         }
 
-        tl.debug(`Completed git checkout for commit.`);
+        // Lets output the latest commit Id to the log if one was not supplied
+        if(!commitId)
+        {
+            commitId = git.getLatestCommitSync();
+        }
+
+        tl.debug(`Completed git checkout for commit ${commitId}.`);
     }
     catch (err) {
         tl.setResult(tl.TaskResult.Failed, err.message);
