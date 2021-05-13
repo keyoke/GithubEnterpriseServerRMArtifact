@@ -138,7 +138,9 @@ export class Git extends events.EventEmitter implements IGit {
         let commitId : string = "";
         var args : Array<string> = [
             "log",
-            "--pretty=format:'%H' -n 1"
+            "--pretty=format:'%H'",
+            "-n",
+            "1"
         ];    
         
         // Get the latest commit Id
