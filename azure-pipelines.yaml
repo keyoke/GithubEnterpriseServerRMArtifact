@@ -1,10 +1,13 @@
 trigger:
-- master
-pr: none
+  - master
+pr:
+  - master
 variables:
   MajorVersion : 1
   MinorVersion : 0
-  PatchVersion : $[counter(format('ghe-extension-{0}.{1}',variables['MajorVersion'],variables['MinorVersion']), 6)]
+  PatchVersion : $[counter(format('ghe-extension-{0}.{1}.{2}',variables['Build.SourceBranchName'],variables['MajorVersion'],variables['MinorVersion']), 26)]
+  isPR : $[startsWith(variables['Build.SourceBranch'],'refs/pull/')] 
+  isMain : $[startsWith(variables['Build.SourceBranch'],'refs/heads/master')] 
 stages:
   - stage : build_package
     displayName: Build & Package Extension
@@ -27,26 +30,36 @@ stages:
           displayName: 'Install Dependencies'
         - script: npm run lint
           displayName: 'Run ESLint'
+          condition: eq(variables.isPR, true)
+        - script: |
+            npm run build
+          condition: eq(variables.isPR, true)
+          displayName: 'Build Server & Service'
         - script: |
             npm run package:ServerVSIX -- --override {\"version\": \"$(MajorVersion).$(MinorVersion).$(PatchVersion)\"}
           displayName: 'Build & Package Server'
+          condition: eq(variables.isMain, true)
         - script: |
             npm run package:ServiceVSIX -- --override {\"version\": \"$(MajorVersion).$(MinorVersion).$(PatchVersion)\"}
           displayName: 'Build & Package Service'
+          condition: eq(variables.isMain, true)
         - task: PowerShell@2
           displayName: 'Tag Git Commit'
+          condition: eq(variables.isMain, true)
           inputs:
             targetType: 'inline'
             script: |
               git tag "v$(MajorVersion).$(MinorVersion).$(PatchVersion)"
         - task: PowerShell@2
           displayName: 'Push Git Tags'
+          condition: eq(variables.isMain, true)
           inputs:
             targetType: 'inline'
             script: |
               git push --tags
         - task: GitHubRelease@1
           displayName: 'Publish Extension as Release'
+          condition: eq(variables.isMain, true)
           inputs:
             gitHubConnection: 'github.com_keyoke'
             repositoryName: '$(Build.Repository.Name)'
