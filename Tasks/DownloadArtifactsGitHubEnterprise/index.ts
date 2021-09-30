@@ -8,6 +8,7 @@ import { Git } from './Git';
 
 async function run() {
   console.log('Downloading artifact.');
+  
   try {
     // Are we debugging?
     const systemDebug = /true/i.test(
