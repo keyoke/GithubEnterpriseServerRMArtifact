@@ -2,7 +2,6 @@ import tl = require('azure-pipelines-task-lib/task');
 import url = require('url');
 import shell = require('shelljs');
 import fs = require('fs');
-import path = require('path');
 import { IGit } from './IGit';
 import { Git } from './Git';
 
